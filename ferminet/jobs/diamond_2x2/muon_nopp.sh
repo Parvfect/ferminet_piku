@@ -10,8 +10,8 @@ cd ~
 source ~/miniforge3/bin/activate
 conda activate ferminet-piku
 
-pwd
-cd ferminet
+cd ferminet_remote
+cd ferminet_piku
 
 export NVIDIA_TF32_OVERRIDE=0
 export JAX_DEFAULT_MATMUL_PRECISION=highest
