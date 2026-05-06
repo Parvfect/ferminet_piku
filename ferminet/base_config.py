@@ -372,7 +372,15 @@ def default() -> ml_collections.ConfigDict:
           },
           'ann_rate': {  # annihilation rate (single scalar per step)
             'calculate': False,
-          }
+          },
+          'srpd':{  # spin resolved pair density
+            'calculate': False,
+            'save_freq': 10000,
+            'rmax': 10.,
+            'r_search': 0,
+            'nbins': 256,
+            'elements': -1,
+          },
       },
       'debug': {
           # Check optimizer state, parameters and loss and raise an exception if

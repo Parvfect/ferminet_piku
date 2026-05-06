@@ -772,3 +772,68 @@ def cal_ann_rate(
     return state * prefactor * n_electrons / Volume
 
   return init_state, ann_rate_estimator
+
+def cal_spin_resolved_pair_density(
+        nspins: Tuple[int, ...],
+        rmax: float,
+        nbins: int,
+        apply_pbc: bool,
+        r_search: int,
+        lattice_vectors: jnp.ndarray):
+        # In PBC - D, B, N, 3 -> R, R - if per device then don't divide by device in hist
+
+        if apply_pbc == False:
+                raise NotImplementedError("Spin resolved pair density only implemented for pbc!")
+
+        grids = jnp.linspace(0, rmax, nbins + 1)
+        dr = grids[1] - grids[0]
+        bin_volume = 4 * jnp.pi / 3.0 * (grids[1:]**3 - grids[:-1]**3)
+        lat = Lattice(lattice_vectors)
+        n_particles = sum(nspins)
+        n_up_electrons, n_down_electrons, _ = nspins
+        init_state = jnp.zeros((2, nbins))
+
+        def srpd_estimator(
+                params: networks.ParamTree,
+                data: networks.FermiNetData,
+                state: jnp.ndarray
+        ):
+            del params
+            
+            n_devices_local = data.positions.shape[0]
+            pos = data.positions.reshape(n_devices_local, -1, n_particles, 3)
+            nwalker_per_device = pos.shape[1]
+            rho_0 = (n_particles - 1) / jnp.linalg.det(lattice_vectors)
+        
+            def pos_to_rabs(x):
+                    """
+                    Np, 3 -> Np (vmap, pmap)
+                    """
+                    rvec = x[:-1, :] - x[-1, :]
+                    _, rabs = min_image_distance_triclinic(rvec, lat, r_search)
+
+                    return rabs
+
+            batch_pos_to_rabs = jax.vmap(pos_to_rabs, in_axes=0, out_axes=0)
+            para_pos_to_rabs = constants.pmap(batch_pos_to_rabs)
+            rabs = para_pos_to_rabs(pos)
+            
+            def compute_hist_per_device(r):
+                    """
+                    D, B, Np -> R
+                    """
+                    hist, _ = jnp.histogram(r.flatten(), bins= nbins, range=(0, rmax))
+                    hist = hist / bin_volume
+                    hist /= nwalker_per_device # * rho_0?
+                    hist = constants.pmean(hist)
+                    return hist
+            
+            para_compute_hist_per_device = constants.pmap(compute_hist_per_device)
+            spin_up_hist = para_compute_hist_per_device(rabs[:, :, :n_up_electrons])
+            spin_down_hist = para_compute_hist_per_device(rabs[:, :, n_up_electrons:])
+
+            state = state.at[0].add(spin_up_hist[0])
+            state = state.at[1].add(spin_down_hist[0])
+
+            return state
+        return grids[:-1] + dr / 2, (init_state, srpd_estimator)

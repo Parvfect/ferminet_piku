@@ -670,6 +670,17 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         cfg.observables.pcf.r_search,
         cfg.system.pbc.lattice_vectors
     )
+
+  if cfg.observables.srpd.calculate:
+    srpd_grids, (observable_states['srpd'],
+     observable_fns['srpd']) = observables.cal_srpd(
+        cfg.system.particles,
+        cfg.observables.srpd.rmax,
+        cfg.observables.srpd.nbins,
+        cfg.system.pbc.apply_pbc,
+        cfg.observables.srpd.r_search,
+        cfg.system.pbc.lattice_vectors
+    )
   
   if cfg.observables.apmd.calculate:
     g_grids, pw_g, (observable_states['apmd'],
@@ -1094,6 +1105,23 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
             pcf_file = open(os.path.join(ckpt_save_path, name), 'w')
             np.savetxt(pcf_file, pcf_data.T, fmt='%.6f')
             pcf_file.close()
+
+      if cfg.observables.srpd.calculate:
+        observable_states['srpd'] = observable_data['srpd']
+        freq = cfg.observables.srpd.save_freq
+        if jax.process_index() == 0:
+          avg = observable_data['srpd'] / (t + 1)  # shape: (2, nbins)
+          if (t + 1) % freq == 0:
+              srpd_data = np.vstack([srpd_grids, avg])  # shape: (3, nbins)
+              name = 'srpd_' + str((t + 1) // freq) + '.txt'
+              with open(os.path.join(ckpt_save_path, name), 'w') as f:
+                  np.savetxt(f, srpd_data.T, fmt='%.6f')
+          if (t + 1) == cfg.optim.iterations:
+              srpd_data = np.vstack([srpd_grids, avg])  # same structure
+              name = 'srpd_final.txt'
+              with open(os.path.join(ckpt_save_path, name), 'w') as f:
+                  np.savetxt(f, srpd_data.T, fmt='%.6f')
+
       if cfg.observables.apmd.calculate:
         observable_states['apmd'] = observable_data['apmd']
         freq = cfg.observables.apmd.save_freq
