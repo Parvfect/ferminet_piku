@@ -375,7 +375,7 @@ def default() -> ml_collections.ConfigDict:
             'calculate': False,
           },
           'srpd':{  # spin resolved pair density
-            'calculate': False,
+            'calculate': True,
             'save_freq': 1000,
             'rmax': 10.,
             'r_search': 0,

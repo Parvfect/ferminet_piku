@@ -660,6 +660,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         os.path.join(ckpt_save_path, 'rho_r.npy'), 'ab')
   
   if cfg.observables.pcf.calculate:
+    print("I enter here")
     pcf_grids, (observable_states['pcf'],
      observable_fns['pcf']) = observables.cal_pcf(
         cfg.system.particles,
@@ -672,6 +673,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
     )
 
   if cfg.observables.srpd.calculate:
+    print("I enter here")
     srpd_grids, (observable_states['srpd'],
      observable_fns['srpd']) = observables.cal_srpd(
         cfg.system.particles,
@@ -1090,6 +1092,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
       if cfg.observables.rho_r.calculate:
         observable_states['rho_r'] = observable_data['rho_r']
       if cfg.observables.pcf.calculate:
+        print("I enter here")
         observable_states['pcf'] = observable_data['pcf']
         freq = cfg.observables.pcf.save_freq
         if jax.process_index() == 0:
@@ -1107,6 +1110,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
             pcf_file.close()
 
       if cfg.observables.srpd.calculate:
+        print("I enter here")
         observable_states['srpd'] = observable_data['srpd']
         freq = cfg.observables.srpd.save_freq
         if jax.process_index() == 0:
