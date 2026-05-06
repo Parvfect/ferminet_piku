@@ -1,0 +1,236 @@
+nid010114
+/home/u6em/parvfect.u6em
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 952, in __getitem__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    field = self._fields[key]
+            ~~~~~~~~~~~~^^^^^
+KeyError: 'molecules'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 853, in __getattr__
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+    return self[attribute]
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+           ~~~~^^^^^^^^^^^
+During handling of the above exception, another exception occurred:
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    return self[attribute]
+           ~~~~^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 958, in __getitem__
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    raise KeyError(self._generate_did_you_mean_message(key, str(e)))
+KeyError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 84, in <module>
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    cfg = get_config()
+          ^^^^^^^^^^^^
+    cfg = get_config()
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    cfg.system.atoms = cfg.system.molecules
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    cfg = get_config()
+          ^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/ferminet/ferminet/configs/diamond/muon_2x2.py", line 51, in get_config
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    cfg.system.atoms = cfg.system.molecules
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+    cfg.system.atoms = cfg.system.molecules
+    raise AttributeError(e)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/home/u6em/parvfect.u6em/miniforge3/envs/ferminet-piku/lib/python3.12/site-packages/ml_collections/config_dict/config_dict.py", line 855, in __getattr__
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+    raise AttributeError(e)
+AttributeError: '\'molecules\'\nDid you mean "molecule" instead of "molecules"?'. Did you mean: 'molecule'?
+srun: error: nid010124: task 3: Exited with exit code 1
+srun: Terminating StepId=3596577.0
+srun: error: nid010122: task 2: Exited with exit code 1
+slurmstepd: error: *** STEP 3596577.0 ON nid010114 CANCELLED AT 2026-04-03T05:41:16 ***
+srun: error: nid010118: task 1: Exited with exit code 1
+srun: error: nid010156: task 5: Exited with exit code 1
+srun: error: nid010114: task 0: Exited with exit code 1
+srun: error: nid010162: task 7: Exited with exit code 1
+srun: error: nid010127: task 4: Exited with exit code 1
+srun: error: nid010159: task 6: Exited with exit code 1
