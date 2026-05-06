@@ -58,7 +58,7 @@ def default() -> ml_collections.ConfigDict:
           # 'wqmc': minimise <H> by Wasserstein QMC
           # 'vmc_overlap': minimize \sum_i <H_i> + \lambda \sum_ij <psi_i psi_j>
           'objective': 'vmc',
-          'iterations': 1000000,  # number of iterations
+          'iterations': 10000000,  # number of iterations
           'optimizer': 'kfac',  # one of adam, kfac, lamb, none
           'laplacian': 'default',  # of of default or folx (for forward lapl)
           # If 0, use standard vmap. If >0, the max batch size for batched_vmap
@@ -365,7 +365,7 @@ def default() -> ml_collections.ConfigDict:
           },
           'apmd': {  # annihilating-pair momentum density
             'calculate': False,
-            'save_freq': 10000,
+            'save_freq': 1000,
             'ecut': 50.0,
             'dq': 0.1,
             'crystal_direction': '100',
@@ -376,7 +376,7 @@ def default() -> ml_collections.ConfigDict:
           },
           'srpd':{  # spin resolved pair density
             'calculate': False,
-            'save_freq': 10000,
+            'save_freq': 1000,
             'rmax': 10.,
             'r_search': 0,
             'nbins': 256,
