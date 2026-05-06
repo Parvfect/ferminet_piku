@@ -349,6 +349,7 @@ def default() -> ml_collections.ConfigDict:
           'density': False,  # density matrix calculated by HF wavefunction
           'density_basis': 'def2-tzvpd',  # basis used for DM calculation
           'dipole': False,  # dipole moment
+          'positions': False,
           'rho_r': { #electron density in real space
             'calculate': False,
             'lim': 10.,
