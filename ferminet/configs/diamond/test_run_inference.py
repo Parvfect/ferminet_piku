@@ -116,7 +116,6 @@ if __name__ == '__main__':
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/pp"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
-    cfg.observables.pcf.calculate = True
     cfg.observables.srpd.calculate = True
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"

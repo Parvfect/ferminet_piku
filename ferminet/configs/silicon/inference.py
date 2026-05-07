@@ -125,9 +125,7 @@ if __name__ == '__main__':
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/silicon/"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
-    cfg.observables.pcf.calculate = True
     cfg.observables.srpd.calculate = True
-    cfg.observables.srpd.save_freq = 10
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
     cfg.optim.optimizer = "none"

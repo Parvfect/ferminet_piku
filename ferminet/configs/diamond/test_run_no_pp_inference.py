@@ -115,7 +115,6 @@ if __name__ == '__main__':
     cfg.log.save_tfreq = 235
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/nopp"
-    cfg.observables.pcf.calculate = True
     cfg.observables.srpd.calculate = True
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
     cfg.optim.reset_if_nan = True
