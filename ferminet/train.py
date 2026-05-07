@@ -674,7 +674,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
 
   if cfg.observables.srpd.calculate:
     srpd_grids, (observable_states['srpd'],
-     observable_fns['srpd']) = observables.cal_srpd(
+     observable_fns['srpd']) = observables.cal_spin_resolved_pair_density(
         cfg.system.particles,
         cfg.observables.srpd.rmax,
         cfg.observables.srpd.nbins,
