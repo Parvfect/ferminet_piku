@@ -660,6 +660,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         os.path.join(ckpt_save_path, 'rho_r.npy'), 'ab')
   
   if cfg.observables.pcf.calculate:
+    print("I enter here")
     pcf_grids, (observable_states['pcf'],
      observable_fns['pcf']) = observables.cal_pcf(
         cfg.system.particles,
@@ -1093,6 +1094,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         observable_states['pcf'] = observable_data['pcf']
         freq = cfg.observables.pcf.save_freq
         if jax.process_index() == 0:
+          print("Saving file - pcf")
           if (t+1) % freq == 0:
             pcf_data = np.array([pcf_grids, observable_data['pcf']/ (t + 1)])
             name = 'pcf_' + str((t+1)//freq) + '.txt'
