@@ -1114,6 +1114,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         if jax.process_index() == 0:
           avg = observable_data['srpd'] / (t + 1)  # shape: (2, nbins)
           if (t + 1) % freq == 0:
+              print("Saving file srpd")
               srpd_data = np.vstack([srpd_grids, avg])  # shape: (3, nbins)
               name = 'srpd_' + str((t + 1) // freq) + '.txt'
               with open(os.path.join(ckpt_save_path, name), 'w') as f:

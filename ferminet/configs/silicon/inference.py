@@ -127,6 +127,7 @@ if __name__ == '__main__':
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
     cfg.observables.pcf.calculate = True
     cfg.observables.srpd.calculate = True
+    cfg.observables.srpd.save_freq = 10
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
     cfg.optim.optimizer = "none"
