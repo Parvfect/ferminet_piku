@@ -44,6 +44,7 @@ def default() -> ml_collections.ConfigDict:
   """
   # wavefunction output.
   cfg = ml_collections.ConfigDict({
+      'empty_param': 20,
       'batch_size': 4096,  # batch size
       # Config module used. Should be set in get_config function as either the
       # absolute module or relative to the configs subdirectory. Relative
