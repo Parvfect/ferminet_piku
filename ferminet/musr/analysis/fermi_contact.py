@@ -11,7 +11,8 @@ from utils.min_distance import min_image_distance_triclinic, Lattice
 
 
 
-def spin_resolved_pair_density(pos, lat, a, n_bins, n_up_electrons=None):
+def spin_resolved_pair_density(
+                pos, lat, a, n_bins, n_up_electrons=None, target_species=-1, coord_centre=None):
         # In PBC - D, B, N, 3 -> R, R - if per device then don't divide by device in hist
 
         r_max = 10  # Distance works up to half the size of the primitive vector length
@@ -19,13 +20,7 @@ def spin_resolved_pair_density(pos, lat, a, n_bins, n_up_electrons=None):
         dr = grids[1] - grids[0]
         bin_volume = 4 * jnp.pi / 3.0 * (grids[1:]**3 - grids[:-1]**3)
         r_search = 1
-        target_species = -1
-
-        D, B, N, d = pos.shape  # Device, Batch, Particles, dimension
-        
-        target_species = N - 2
-        
-        rho_0 = (N - 1) / jnp.linalg.det(lat)
+        D, B, N, d = pos.shape  # Device, Batch, Particles, dimension    
         
         if not n_up_electrons:
                 n_up_electrons = N // 2 # Assuming n_up is directly divisible
@@ -34,7 +29,10 @@ def spin_resolved_pair_density(pos, lat, a, n_bins, n_up_electrons=None):
                 """
                 Np, 3 -> Np (vmap, pmap)
                 """
-                rvec = x[:-1, :] - x[-1, :]
+                if target_species == 0:
+                    rvec = x - coord_centre  # If we don't have a target species, we are doing classical around one Coord center position
+                else:
+                    rvec = x[:-1, :] - x[-1, :]
                 _, rabs = min_image_distance_triclinic(rvec, Lattice(lat), r_search)
 
                 return rabs

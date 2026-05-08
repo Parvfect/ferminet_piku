@@ -779,8 +779,12 @@ def cal_spin_resolved_pair_density(
         nbins: int,
         apply_pbc: bool,
         r_search: int,
-        lattice_vectors: jnp.ndarray):
-        # In PBC - D, B, N, 3 -> R, R - if per device then don't divide by device in hist
+        lattice_vectors: jnp.ndarray,
+        use_fixed_origin: bool = False,
+        origin_coord: jnp.array = None):
+        """
+        If target_species == 0 -> classical muon calclulation - p(r) from origin_coord (cartesian)
+        """
 
         if apply_pbc == False:
                 raise NotImplementedError("Spin resolved pair density only implemented for pbc!")
@@ -790,7 +794,12 @@ def cal_spin_resolved_pair_density(
         bin_volume = 4 * jnp.pi / 3.0 * (grids[1:]**3 - grids[:-1]**3)
         lat = Lattice(lattice_vectors)
         n_particles = sum(nspins)
-        n_up_electrons, n_down_electrons, _ = nspins
+
+        if use_fixed_origin:  # No muon
+          n_up_electrons, n_down_electrons = nspins
+        else: 
+          n_up_electrons, n_down_electrons, _ = nspins
+
         init_state = jnp.zeros((2, nbins))
 
         def srpd_estimator(
@@ -809,7 +818,11 @@ def cal_spin_resolved_pair_density(
                     """
                     Np, 3 -> Np (vmap, pmap)
                     """
-                    rvec = x[:-1, :] - x[-1, :]
+                    if use_fixed_origin:
+                      rvec = x - origin_coord
+                    else:
+                      rvec = x[:-1, :] - x[-1, :]
+
                     _, rabs = min_image_distance_triclinic(rvec, lat, r_search)
 
                     return rabs

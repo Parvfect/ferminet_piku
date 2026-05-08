@@ -673,6 +673,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
     )
 
   if cfg.observables.srpd.calculate:
+    print(cfg.observables.srpd)
     srpd_grids, (observable_states['srpd'],
      observable_fns['srpd']) = observables.cal_spin_resolved_pair_density(
         cfg.system.particles,
@@ -680,7 +681,9 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         cfg.observables.srpd.nbins,
         cfg.system.pbc.apply_pbc,
         cfg.observables.srpd.r_search,
-        cfg.system.pbc.lattice_vectors
+        cfg.system.pbc.lattice_vectors,
+        cfg.observables.srpd.use_fixed_origin,
+        cfg.observables.srpd.origin_coord
     )
   
   if cfg.observables.apmd.calculate:

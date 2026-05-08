@@ -380,7 +380,8 @@ def default() -> ml_collections.ConfigDict:
             'rmax': 10.,
             'r_search': 0,
             'nbins': 256,
-            'elements': -1,
+            'use_fixed_origin': False,
+            'origin_coord': None
           },
       },
       'debug': {
