@@ -124,7 +124,7 @@ if __name__ == '__main__':
     cfg = get_config()
 
     # Training config
-    cfg.optim.iterations = 900001
+    cfg.optim.iterations = 100000
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
     cfg.log.save_path = "/projects/u6em/parv/silicon/T_classical"

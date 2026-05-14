@@ -4,3 +4,4 @@
 *.npz
 *.json
 *.out
+ferminet/configs/dft/

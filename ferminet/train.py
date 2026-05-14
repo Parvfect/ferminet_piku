@@ -1046,6 +1046,7 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         directory=ckpt_save_path,
         append=need_append)
   with writer_manager as writer:
+    positions_savepath = os.path.join(cfg.log.save_path, "positions")
     # Main training loop
     num_resets = 0  # used if reset_if_nan is true
 
@@ -1067,6 +1068,11 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
           opt_state,
           subkeys,
           mcmc_width)
+      
+      if cfg.observables.positions and (t-t_init) < 1000:
+        npy_savepath = os.path.join(positions_savepath, f"positions_{t}.npy")
+        with open(npy_savepath, 'wb') as f:
+          np.save(f, data.positions)
 
       if cfg.system.pbc.put_in_box:
         # Ensure electrons remain in the box

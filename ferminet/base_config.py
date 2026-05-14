@@ -345,6 +345,7 @@ def default() -> ml_collections.ConfigDict:
           'make_envelope_kwargs': {},
       },
       'observables': {
+          'positions': False, # save raw positions
           's2': False,  # spin magnitude
           'density': False,  # density matrix calculated by HF wavefunction
           'density_basis': 'def2-tzvpd',  # basis used for DM calculation
