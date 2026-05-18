@@ -47,7 +47,7 @@ def get_config():
         system.Atom('C', (1.25*a, 0.75*a, 0.75*a)),
         system.Atom('C', (0.75*a, 0.75*a, 1.25*a)),
         system.Atom('C', (1.25*a, 1.25*a, 1.25*a)),
-        system.Atom('H', (0.25*a, 0.25*a, 0.75*a))
+        system.Atom('H', (0.75*a, 0.75*a, 0.75*a))
     ]
 
     cfg.system.atoms = cfg.system.molecule
