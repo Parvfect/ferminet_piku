@@ -377,10 +377,10 @@ def default() -> ml_collections.ConfigDict:
           },
           'srpd':{  # spin resolved pair density
             'calculate': False,
-            'save_freq': 1000,
+            'save_freq': 200,
             'rmax': 10.,
             'r_search': 0,
-            'nbins': 256,
+            'nbins': 200,
             'use_fixed_origin': False,
             'origin_coord': None
           },
