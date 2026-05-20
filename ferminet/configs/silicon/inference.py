@@ -119,14 +119,14 @@ if __name__ == '__main__':
     cfg = get_config()
 
     #Train
-    cfg.optim.iterations = 1000
+    cfg.optim.iterations = 100000
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/silicon/"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
-    cfg.observables.srpd.calculate = False
-    cfg.observables.positions = True
+    cfg.observables.srpd.calculate = True
+    cfg.observables.positions = False
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
     cfg.optim.optimizer = "none"

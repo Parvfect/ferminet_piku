@@ -835,7 +835,8 @@ def cal_spin_resolved_pair_density(
                     """
                     D, B, Np -> R
                     """
-                    hist, _ = jnp.histogram(r.flatten(), bins= nbins, range=(0, rmax))
+                    #hist, _ = jnp.histogram(r.flatten(), bins= nbins, range=(0, rmax)) # defining grids differently again!
+                    hist, _ = jnp.histogram(r, bins=grids)
                     hist = hist / bin_volume
                     hist /= nwalker_per_device # * rho_0?
                     hist = constants.pmean(hist)
