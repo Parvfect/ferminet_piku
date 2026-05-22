@@ -91,7 +91,8 @@ def get_config():
         [a, 0, a]
     ])
 
-    cfg.observables.srpd.origin_coord = np.array([0.25*a, 0.25*a, 0.75*a])
+    cfg.observables.srpd.origin_coord = np.array(
+        [0.75*a, 0.75*a, 0.75*a])
 
     cfg.system.pbc.apply_pbc = True
     cfg.network.full_det = False
