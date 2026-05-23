@@ -6,9 +6,9 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('server_addr', '',
                     help=('Enables multihost calculations if given. '
                           'Server ip address of host node'))
-
 node_id = os.environ['SLURM_NODEID']
 visible_devices = [int(gpu) for gpu in os.environ['CUDA_VISIBLE_DEVICES'].split(',')]
+
 
 
 def get_config():
@@ -23,40 +23,38 @@ def get_config():
 
     MUON_MASS = 206.7682827
 
-    # Silicon lattice constant (bohr)
-    a = 10.26  # ~5.43 Å
+    # Set up molecule
+    a = 6.74  # Lattice constant in bohr
+    cfg.system.particles = (48, 48, 1)
+    cfg.system.charges = (-1., -1., 1.)
+    cfg.system.masses = (1., 1., MUON_MASS)
 
-    # 16 Si atoms → 64 valence electrons (with pseudopotential)
-    cfg.system.particles = (32, 32)
-    cfg.system.charges = (-1., -1.)
-    cfg.system.masses = (1., 1.)
-
-    # 2x2x2 diamond supercell (16 atoms)
     cfg.system.molecule = [
-        system.Atom('Si', (0, 0, 0)),
-        system.Atom('Si', (0.5*a, 0.5*a, 0)),
-        system.Atom('Si', (0, 0.5*a, 0.5*a)),
-        system.Atom('Si', (0.5*a, 0, 0.5*a)),
-        system.Atom('Si', (0.5*a, a, 0.5*a)),
-        system.Atom('Si', (a, 0.5*a, 0.5*a)),
-        system.Atom('Si', (0.5*a, 0.5*a, a)),
-        system.Atom('Si', (a, a, a)),
-        system.Atom('Si', (0.25*a, 0.25*a, 0.25*a)),
-        system.Atom('Si', (0.75*a, 0.75*a, 0.25*a)),
-        system.Atom('Si', (0.25*a, 0.75*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 0.25*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 1.25*a, 0.75*a)),
-        system.Atom('Si', (1.25*a, 0.75*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 0.75*a, 1.25*a)),
-        system.Atom('Si', (1.25*a, 1.25*a, 1.25*a)),
-        system.Atom('H', (0.75*a, 0.75*a, 0.75*a))
+    system.Atom('C', (0.00*a, 0.00*a, 0.01*a)),
+    system.Atom('C', (0.25*a, 0.25*a, 0.24*a)),
+    system.Atom('C', (0.45*a, 0.45*a, -0.05*a)),
+    system.Atom('C', (0.80*a, 0.80*a, 0.30*a)),
+    system.Atom('C', (0.50*a, -0.00*a, 0.50*a)),
+    system.Atom('C', (0.75*a, 0.25*a, 0.75*a)),
+    system.Atom('C', (1.00*a, 0.51*a, 0.50*a)),
+    system.Atom('C', (1.25*a, 0.74*a, 0.75*a)),
+    system.Atom('C', (0.00*a, 0.50*a, 0.50*a)),
+    system.Atom('C', (0.25*a, 0.75*a, 0.75*a)),
+    system.Atom('C', (0.51*a, 1.00*a, 0.50*a)),
+    system.Atom('C', (0.74*a, 1.25*a, 0.75*a)),
+    system.Atom('C', (0.50*a, 0.50*a, 1.00*a)),
+    system.Atom('C', (0.75*a, 0.75*a, 1.25*a)),
+    system.Atom('C', (1.00*a, 1.00*a, 1.00*a)),
+    system.Atom('C', (1.25*a, 1.25*a, 1.25*a)),
     ]
+
+    
 
     cfg.system.atoms = cfg.system.molecule
 
     # Pseudopotential setup
-    cfg.system.use_pp = True
-    cfg.system.pp.symbols = ['Si']
+    cfg.system.use_pp = False
+    cfg.system.pp.symbols = ['C']
 
     mol = gto.Mole()
     mol.atom = [[atom.symbol, atom.coords] for atom in cfg.system.molecule]
@@ -74,7 +72,7 @@ def get_config():
         for atom in atoms if atom in pseudo_atoms
     }
 
-    mol.charge = 1
+    mol.charge = 0
     mol.spin = 0
     mol.unit = 'bohr'
     mol.build()
@@ -84,15 +82,12 @@ def get_config():
     # No pretraining for PBC
     cfg.pretrain.method = None
 
-    # Supercell lattice vectors (kept same structure)
+    # Primitive cell of fcc
     cfg.system.pbc.lattice_vectors = np.array([
         [a, a, 0],
         [0, a, a],
         [a, 0, a]
     ])
-
-    cfg.observables.srpd.origin_coord = np.array(
-        [0.75*a, 0.75*a, 0.75*a])
 
     cfg.system.pbc.apply_pbc = True
     cfg.network.full_det = False
@@ -125,14 +120,11 @@ if __name__ == '__main__':
     cfg = get_config()
 
     # Training config
-    cfg.optim.iterations = 100000
-    cfg.log.save_freq = 2000000
+    cfg.optim.iterations = 1000
+    cfg.log.save_freq = 20000000
     cfg.log.save_tfreq = 2350000
-    cfg.log.save_path = "/projects/u6em/parv/silicon/T_classical"
-
-    cfg.observables.srpd.calculate = True
-    cfg.observables.srpd.use_fixed_origin = True # Relative to coord origin
-
+    cfg.observables.positions = True
+    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/bc_relaxed/nopp"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
     cfg.optim.optimizer = "none"
