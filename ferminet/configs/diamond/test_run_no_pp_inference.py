@@ -111,8 +111,8 @@ if __name__ == '__main__':
 
     #Train
     cfg.optim.iterations = 100000
-    cfg.log.save_freq = 2000
-    cfg.log.save_tfreq = 235
+    cfg.log.save_freq = 2000000
+    cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/nopp"
     cfg.observables.srpd.calculate = True
