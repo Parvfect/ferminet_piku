@@ -124,9 +124,9 @@ if __name__ == '__main__':
     cfg = get_config()
 
     #Train
-    cfg.optim.iterations = 100000
-    cfg.log.save_freq = 20000000
-    cfg.log.save_tfreq = 235
+    cfg.optim.iterations = 10000000
+    cfg.log.save_freq = 200000000
+    cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/T_classical/pp"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility

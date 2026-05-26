@@ -110,7 +110,7 @@ if __name__ == '__main__':
     cfg = get_config()
 
     #Train
-    cfg.optim.iterations = 100000
+    cfg.optim.iterations = 10000000
     cfg.log.save_freq = 2000000
     cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True

@@ -125,9 +125,9 @@ if __name__ == '__main__':
     cfg = get_config()
 
     # Training config
-    cfg.optim.iterations = 100000
-    cfg.log.save_freq = 2000000
-    cfg.log.save_tfreq = 2350000
+    cfg.optim.iterations = 10000000
+    cfg.log.save_freq = 200000000
+    cfg.log.save_tfreq = 235000000
     cfg.log.save_path = "/projects/u6em/parv/silicon/T_classical"
 
     cfg.observables.srpd.calculate = True

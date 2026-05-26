@@ -119,9 +119,9 @@ if __name__ == '__main__':
     cfg = get_config()
 
     #Train
-    cfg.optim.iterations = 100000
-    cfg.log.save_freq = 2000000
-    cfg.log.save_tfreq = 235000
+    cfg.optim.iterations = 10000000
+    cfg.log.save_freq = 200000000
+    cfg.log.save_tfreq = 23500000
     cfg.log.restore_from_checkpoint = True
     cfg.log.save_path = "/projects/u6em/parv/silicon/"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
