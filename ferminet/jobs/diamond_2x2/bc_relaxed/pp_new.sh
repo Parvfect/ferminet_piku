@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_2x2_diamond
-#SBATCH --output=muon.out
+#SBATCH --job-name=bc_diamond_pp_new
+#SBATCH --output=pp_new.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00 
