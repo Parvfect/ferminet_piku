@@ -30,22 +30,22 @@ def get_config():
     cfg.system.masses = (1., 1., MUON_MASS)
 
     cfg.system.molecule = [
-    system.Atom('C', (0.00*a, 0.00*a, 0.01*a)),
-    system.Atom('C', (0.25*a, 0.25*a, 0.24*a)),
-    system.Atom('C', (0.45*a, 0.45*a, -0.05*a)),
-    system.Atom('C', (0.80*a, 0.80*a, 0.30*a)),
-    system.Atom('C', (0.50*a, -0.00*a, 0.50*a)),
-    system.Atom('C', (0.75*a, 0.25*a, 0.75*a)),
-    system.Atom('C', (1.00*a, 0.51*a, 0.50*a)),
-    system.Atom('C', (1.25*a, 0.74*a, 0.75*a)),
-    system.Atom('C', (0.00*a, 0.50*a, 0.50*a)),
-    system.Atom('C', (0.25*a, 0.75*a, 0.75*a)),
-    system.Atom('C', (0.51*a, 1.00*a, 0.50*a)),
-    system.Atom('C', (0.74*a, 1.25*a, 0.75*a)),
-    system.Atom('C', (0.50*a, 0.50*a, 1.00*a)),
-    system.Atom('C', (0.75*a, 0.75*a, 1.25*a)),
-    system.Atom('C', (1.00*a, 1.00*a, 1.00*a)),
-    system.Atom('C', (1.25*a, 1.25*a, 1.25*a)),
+    system.Atom('C', (-0.04975306*a, -0.04975303*a, -0.04975303*a)),
+    system.Atom('C', ( 0.29984779*a,  0.29984777*a,  0.2998478*a )),
+    system.Atom('C', ( 0.50291589*a,  0.50291587*a,  0.00739201*a)),
+    system.Atom('C', ( 0.74755822*a,  0.74755822*a,  0.24270302*a)),
+    system.Atom('C', ( 0.50291586*a,  0.007392*a,    0.50291587*a)),
+    system.Atom('C', ( 0.74755825*a,  0.24270304*a,  0.74755821*a)),
+    system.Atom('C', ( 1.00221291*a,  0.50048928*a,  0.50048927*a)),
+    system.Atom('C', ( 1.2486404*a,   0.74998489*a,  0.74998491*a)),
+    system.Atom('C', ( 0.00739207*a,  0.50291589*a,  0.50291591*a)),
+    system.Atom('C', ( 0.24270298*a,  0.74755822*a,  0.74755819*a)),
+    system.Atom('C', ( 0.50048924*a,  1.00221292*a,  0.50048927*a)),
+    system.Atom('C', ( 0.74998493*a,  1.24864038*a,  0.74998492*a)),
+    system.Atom('C',  ( 0.50048925*a,  0.5004893*a,   1.00221293*a)),
+    system.Atom('C', ( 0.74998492*a,  0.74998489*a,  1.24864037*a)),
+    system.Atom('C', ( 0.99993799*a,  0.99993794*a,  0.99993791*a)),
+    system.Atom('C', ( 1.25091541*a,  1.25091548*a,  1.2509155*a)),
     ]
 
     cfg.system.atoms = cfg.system.molecule
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     cfg.optim.iterations = 900001
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
-    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/bc_relaxed/pp"
+    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/bc_relaxed/pp_new"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
 
