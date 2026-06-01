@@ -71,7 +71,7 @@ def get_config():
         for atom in atoms if atom in pseudo_atoms
     }
 
-    mol.charge = 0
+    mol.charge = 1
     mol.spin = 0
     mol.unit = 'bohr'
     mol.build()
