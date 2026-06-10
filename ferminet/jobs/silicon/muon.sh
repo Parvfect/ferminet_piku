@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=silicon
-#SBATCH --output=muon_silicon_q_unrelaxed
+#SBATCH --job-name=muon_silicon_q_unrelaxed
+#SBATCH --output=muon_silicon_q_unrelaxed.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00 
