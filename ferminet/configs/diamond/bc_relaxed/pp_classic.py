@@ -25,7 +25,7 @@ def get_config():
 
     # Set up molecule
     a = 6.74  # Lattice constant in bohr
-    cfg.system.particles = (32, 32)
+    cfg.system.particles = (33, 32)
     cfg.system.charges = (-1., -1.)
     cfg.system.masses = (1., 1.)
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     cfg.optim.iterations = 900001
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
-    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/bc_relaxed/pp_T"
+    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/classical/bc"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
 
