@@ -25,7 +25,7 @@ def get_config():
 
     # Set up molecule
     a = 6.74  # Lattice constant in bohr
-    cfg.system.particles = (32, 32, 1)
+    cfg.system.particles = (33, 32, 1)
     cfg.system.charges = (-1., -1., 1.)
     cfg.system.masses = (1., 1., MUON_MASS)
 
