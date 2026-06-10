@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_2x2_diamond_nopp_
+#SBATCH --job-name=muon_d_qnopp_bc_rel
 #SBATCH --output=muon_nopp.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4

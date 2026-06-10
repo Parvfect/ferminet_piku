@@ -122,7 +122,7 @@ if __name__ == '__main__':
     cfg.optim.iterations = 900001
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
-    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/nopp"
+    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/unrelaxed/nopp"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
 

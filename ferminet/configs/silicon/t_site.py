@@ -27,7 +27,7 @@ def get_config():
     a = 10.26  # ~5.43 Å
 
     # 16 Si atoms → 64 valence electrons (with pseudopotential)
-    cfg.system.particles = (32, 32)
+    cfg.system.particles = (33, 32)
     cfg.system.charges = (-1., -1.)
     cfg.system.masses = (1., 1.)
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     cfg.optim.iterations = 900001
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
-    cfg.log.save_path = "/projects/u6em/parv/silicon/T_classical"
+    cfg.log.save_path = "/projects/u6em/parv/silicon_unpaired/classic"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
 

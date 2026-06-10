@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=silicon_t_site
+#SBATCH --job-name=muon_silicon_c_tsite
 #SBATCH --output=t_site.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4

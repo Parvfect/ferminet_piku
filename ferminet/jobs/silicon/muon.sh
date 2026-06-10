@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=silicon
-#SBATCH --output=muon.out
+#SBATCH --output=muon_silicon_q_unrelaxed
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00 
@@ -24,4 +24,4 @@ IP_ADDR=$(ifconfig 2> /dev/null | awk '$1 == "inet" {print $2}' | head -n 2 | ta
 srun --nodes=8 \
      --gres=gpu:4 \
      --export=ALL \
-     python -u ferminet/configs/silicon.py --server_addr="$IP_ADDR:$PORT"
+     python -u ferminet/configs/pp.py --server_addr="$IP_ADDR:$PORT"

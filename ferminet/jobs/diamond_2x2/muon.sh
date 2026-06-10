@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_2x2_diamond
+#SBATCH --job-name=muon_qpp_diamond_unrelaxed
 #SBATCH --output=muon.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
