@@ -27,28 +27,31 @@ def get_config():
     a = 10.26  # ~5.43 Å
 
     # 16 Si atoms → 64 valence electrons (with pseudopotential)
-    cfg.system.particles = (32, 32, 1)
+    cfg.system.particles = (33, 32, 1)
     cfg.system.charges = (-1., -1., 1.)
     cfg.system.masses = (1., 1., MUON_MASS)
 
-    # 2x2x2 diamond supercell (16 atoms)
+    # 2x2x2 diamond supercell (16 atoms), BC-relaxed for an unpaired-electron
+    # muon at the bond centre. Coordinates are the DFT-relaxed positions in units
+    # of `a` (see musr/analysis/silicon_coordiantes.py); Si #0 and #8 (flanking
+    # the muon) move ~0.77 bohr outward along [111], a +34.8% Si-Si bond expansion.
     cfg.system.molecule = [
-        system.Atom('Si', (0, 0, 0)),
-        system.Atom('Si', (0.5*a, 0.5*a, 0)),
-        system.Atom('Si', (0, 0.5*a, 0.5*a)),
-        system.Atom('Si', (0.5*a, 0, 0.5*a)),
-        system.Atom('Si', (0.5*a, a, 0.5*a)),
-        system.Atom('Si', (a, 0.5*a, 0.5*a)),
-        system.Atom('Si', (0.5*a, 0.5*a, a)),
-        system.Atom('Si', (a, a, a)),
-        system.Atom('Si', (0.25*a, 0.25*a, 0.25*a)),
-        system.Atom('Si', (0.75*a, 0.75*a, 0.25*a)),
-        system.Atom('Si', (0.25*a, 0.75*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 0.25*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 1.25*a, 0.75*a)),
-        system.Atom('Si', (1.25*a, 0.75*a, 0.75*a)),
-        system.Atom('Si', (0.75*a, 0.75*a, 1.25*a)),
-        system.Atom('Si', (1.25*a, 1.25*a, 1.25*a)),
+        system.Atom('Si', (-0.043460*a, -0.043460*a, -0.043460*a)),
+        system.Atom('Si', (0.505552*a, 0.505552*a, -0.005961*a)),
+        system.Atom('Si', (-0.005961*a, 0.505552*a, 0.505552*a)),
+        system.Atom('Si', (0.505552*a, -0.005961*a, 0.505552*a)),
+        system.Atom('Si', (0.499147*a, 1.002493*a, 0.499147*a)),
+        system.Atom('Si', (1.002493*a, 0.499147*a, 0.499147*a)),
+        system.Atom('Si', (0.499147*a, 0.499147*a, 1.002493*a)),
+        system.Atom('Si', (1.000592*a, 1.000592*a, 1.000592*a)),
+        system.Atom('Si', (0.293460*a, 0.293460*a, 0.293460*a)),
+        system.Atom('Si', (0.744446*a, 0.744446*a, 0.255961*a)),
+        system.Atom('Si', (0.255961*a, 0.744446*a, 0.744446*a)),
+        system.Atom('Si', (0.744446*a, 0.255961*a, 0.744446*a)),
+        system.Atom('Si', (0.750851*a, 1.247504*a, 0.750851*a)),
+        system.Atom('Si', (1.247504*a, 0.750851*a, 0.750851*a)),
+        system.Atom('Si', (0.750851*a, 0.750851*a, 1.247504*a)),
+        system.Atom('Si', (1.249406*a, 1.249405*a, 1.249405*a)),
     ]
 
     cfg.system.atoms = cfg.system.molecule
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     cfg.optim.iterations = 900001
     cfg.log.save_freq = 2000
     cfg.log.save_tfreq = 235
-    cfg.log.save_path = "/projects/u6em/parv/silicon"
+    cfg.log.save_path = "/projects/u6em/parv/silicon_unpaired/bc_relaxed"
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
 
