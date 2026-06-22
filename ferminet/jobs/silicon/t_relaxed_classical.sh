@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_d_qpp_bc_rel_2
-#SBATCH --output=pp_relax_2.out
+#SBATCH --job-name=muon_silicon_c_t_relaxed
+#SBATCH --output=t_relaxed_classical.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00
@@ -24,4 +24,4 @@ IP_ADDR=$(ifconfig 2> /dev/null | awk '$1 == "inet" {print $2}' | head -n 2 | ta
 srun --nodes=8 \
      --gres=gpu:4 \
      --export=ALL \
-     python -u ferminet/configs/diamond/bc_relaxed/pp_relax_2.py --server_addr="$IP_ADDR:$PORT"
+     python -u ferminet/configs/silicon/t_relaxed_classical.py --server_addr="$IP_ADDR:$PORT"
