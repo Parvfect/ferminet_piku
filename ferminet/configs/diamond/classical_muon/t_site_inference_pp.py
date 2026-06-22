@@ -26,7 +26,9 @@ def get_config():
 
     # Set up molecule
     a = 6.74  # Lattice constant in bohr
-    cfg.system.particles = (32, 32)
+    # 33 up + 32 down = 65 electrons (+1 up-spin unpaired e- for the muonium doublet),
+    # matching the trained checkpoint (positions = 195/3 = 65 electrons).
+    cfg.system.particles = (33, 32)
     cfg.system.charges = (-1., -1.)
     cfg.system.masses = (1., 1.)
 
@@ -101,7 +103,8 @@ def get_config():
     # Training hyperparameters
     cfg.batch_size = 4096
     cfg.pretrain.iterations = 0
-    cfg.log.restore_path = "train"
+    # Restore the (currently training) classical T-site pp run; uses its latest checkpoint.
+    cfg.log.restore_path = "/projects/u6em/parv/diamond/unpaired/classical/T_site/pp"
 
     return cfg
 
@@ -128,7 +131,9 @@ if __name__ == '__main__':
     cfg.log.save_freq = 200000000
     cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True
-    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/T_classical/pp"
+    # Fresh, empty inference output dir: find_last_checkpoint(save_path) returns None and
+    # falls back to restore_path (the trained checkpoints). SRPD output lands here.
+    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/classical/T_site/pp/inference"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
     
     cfg.observables.srpd.calculate = True

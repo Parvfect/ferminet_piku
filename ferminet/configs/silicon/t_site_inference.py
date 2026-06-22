@@ -26,8 +26,10 @@ def get_config():
     # Silicon lattice constant (bohr)
     a = 10.26  # ~5.43 Å
 
-    # 16 Si atoms → 64 valence electrons (with pseudopotential)
-    cfg.system.particles = (32, 32)
+    # 16 Si atoms → 64 valence electrons (with pseudopotential), +1 up-spin
+    # unpaired electron to pair with the muon → 65 electrons (doublet), matching
+    # the trained network (qmcjax_ckpt has 65 e-).
+    cfg.system.particles = (33, 32)
     cfg.system.charges = (-1., -1.)
     cfg.system.masses = (1., 1.)
 
@@ -102,7 +104,8 @@ def get_config():
     # Training hyperparameters
     cfg.batch_size = 4096
     cfg.pretrain.iterations = 0
-    cfg.log.restore_path = "train"
+    # Restore the finished silicon classical T-site training run (65 e-).
+    cfg.log.restore_path = "/projects/u6em/parv/silicon_unpaired/classic"
 
     return cfg
 
@@ -128,7 +131,9 @@ if __name__ == '__main__':
     cfg.optim.iterations = 10000000
     cfg.log.save_freq = 200000000
     cfg.log.save_tfreq = 235000000
-    cfg.log.save_path = "/projects/u6em/parv/silicon/T_classical"
+    # Fresh, empty inference output dir so find_last_checkpoint(save_path)
+    # returns None and falls back to restore_path (the trained checkpoints).
+    cfg.log.save_path = "/projects/u6em/parv/silicon_unpaired/classic/inference_srpd"
 
     cfg.observables.srpd.calculate = True
     cfg.observables.srpd.use_fixed_origin = True # Relative to coord origin

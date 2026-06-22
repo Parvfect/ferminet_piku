@@ -5,3 +5,5 @@
 *.json
 *.out
 ferminet/configs/dft/
+core
+.claude/

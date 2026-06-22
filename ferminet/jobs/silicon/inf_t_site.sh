@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=inf_muon_diamond_tsite
-#SBATCH --output=inf_t_site.out
+#SBATCH --job-name=inf_muon_silicon_tsite
+#SBATCH --output=inf_silicon_t_site.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00 

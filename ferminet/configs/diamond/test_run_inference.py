@@ -23,7 +23,10 @@ def get_config():
 
     # Set up molecule
     a = 6.74  # Lattice constant in bohr
-    cfg.system.particles = (32, 32, 1)
+    # 33 up + 32 down electrons (+1 up-spin unpaired e- pairs with the muon → 65 e-,
+    # neutral muonium doublet) + 1 quantum muon = 66 particles, matching the trained
+    # checkpoint (positions = 198/3 = 66 particles).
+    cfg.system.particles = (33, 32, 1)
     cfg.system.charges = (-1., -1., 1.)
     cfg.system.masses = (1., 1., MUON_MASS)
     # 16 C atoms in diamond structure
@@ -88,7 +91,8 @@ def get_config():
     # Set training hyperparameters
     cfg.batch_size = 4096
     cfg.pretrain.iterations = 0
-    cfg.log.restore_path = "train"
+    # Restore the plateaued unrelaxed-pp training run (last checkpoint ckpt_522000, 66 particles).
+    cfg.log.restore_path = "/projects/u6em/parv/diamond/unpaired/unrelaxed/pp"
 
     return cfg
 
@@ -114,7 +118,9 @@ if __name__ == '__main__':
     cfg.log.save_freq = 2000000
     cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True
-    cfg.log.save_path = "/projects/u6em/parv/diamond/2x2_muon/pp"
+    # Fresh, empty inference output dir: find_last_checkpoint(save_path) returns None and
+    # falls back to restore_path (the trained checkpoints). SRPD output lands here.
+    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/unrelaxed/pp/inference"
     # cfg.debug.deterministic = True  # Use deterministic mode for reproducibility
     cfg.observables.srpd.calculate = True
     cfg.observables.positions = False
