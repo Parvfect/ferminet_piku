@@ -43,6 +43,8 @@ def init_electrons(  # pylint: disable=dangerous-default-value
     init_width: float,
     core_electrons: Mapping[str, int] = {},
     max_iter: int = 10_000,
+    muon_init_coord: Optional[Sequence[float]] = None,
+    muon_init_width: float = 0.5,
 ) -> Tuple[jnp.ndarray, jnp.ndarray]:
   """Initializes electron positions around each atom.
 
@@ -60,6 +62,11 @@ def init_electrons(  # pylint: disable=dangerous-default-value
     max_iter: maximum number of iterations to try to find a valid initial
         electron configuration for each atom. If reached, all electrons are
         initialised from a Gaussian distribution centred on the origin.
+    muon_init_coord: optional (x, y, z) in bohr (same frame as molecule). If
+        given, the last particle (the muon) is re-initialised at this point
+        instead of its default atom-centred position. Electrons are unaffected.
+    muon_init_width: Gaussian width (bohr) about muon_init_coord. Only used
+        when muon_init_coord is given.
 
   Returns:
     array of (batch_size, (nalpha+nbeta)*ndim) of initial (random) electron
@@ -89,6 +96,16 @@ def init_electrons(  # pylint: disable=dangerous-default-value
       jax.random.normal(subkey, shape=electron_positions.shape)
       * init_width
   )
+
+  # Optionally override the muon (last particle) walker positions. Electrons
+  # keep their atom-centred init; only the muon is re-seeded at muon_init_coord.
+  if muon_init_coord is not None:
+    ep = electron_positions.reshape(batch_size, sum(electrons), ndim)
+    key, subkey = jax.random.split(key)
+    muon_pos = (jnp.asarray(muon_init_coord)
+                + jax.random.normal(subkey, (batch_size, ndim)) * muon_init_width)
+    ep = ep.at[:, -1, :].set(muon_pos)
+    electron_positions = ep.reshape(batch_size, sum(electrons) * ndim)
 
   electron_spins = _assign_spin_configuration(
       electrons, batch_size
@@ -132,6 +149,8 @@ def init_mcmc_data(
       batch_size=total_host_batch_size,
       init_width=cfg.mcmc.init_width,
       core_electrons=core_electrons,
+      muon_init_coord=cfg.mcmc.muon_init_coord,
+      muon_init_width=cfg.mcmc.muon_init_width,
   )
   # For excited states, each device has a batch of walkers, where each walker
   # is nstates * nelectrons. The vmap over nstates is handled in the function

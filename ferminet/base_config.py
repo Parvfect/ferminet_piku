@@ -249,6 +249,12 @@ def default() -> ml_collections.ConfigDict:
           'fake_energy': False,  # If true, use a fake energy to sample
           'sample_all': False,  # If true, sample all particles in each step. If False, sample only one particle at a time.
           'save_positions': False,  # Save the electron positions in pos.npy
+          # Optional (x,y,z) in bohr (molecule frame) at which to seed the muon
+          # (last particle) walkers. None => default atom-centred init for all
+          # particles (preserves behaviour of every existing config).
+          'muon_init_coord': None,
+          # Gaussian width (bohr) about muon_init_coord. Only used if set.
+          'muon_init_width': 0.5,
       },
       'network': {
           'network_type': 'ferminet',  # One of 'ferminet' or 'psiformer'.

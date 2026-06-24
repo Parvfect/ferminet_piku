@@ -71,6 +71,19 @@ C_BC_RELAXED = np.array([
     [0.99993799, 0.99993794, 0.99993791], [1.25091541, 1.25091548, 1.2509155],
 ]) * A
 
+# Second DFT-relaxed (open-shell, unpaired-electron) C atoms around the bond
+# centre, from inference_pp_relax_2.py. Muon (H) at (0.125,0.125,0.125)*a (BC).
+C_BC_RELAXED_2 = np.array([
+    [-0.05139189, -0.05139189, -0.05139188], [0.30148672, 0.30148672, 0.30148671],
+    [0.50344702, 0.50344703, 0.00524092], [0.74702714, 0.74702712, 0.24485391],
+    [0.50344701, 0.00524094, 0.50344701], [0.74702714, 0.24485389, 0.74702714],
+    [1.00212309, 0.49931984, 0.49931985], [1.24873038, 0.75115431, 0.75115431],
+    [0.00524093, 0.50344703, 0.50344702], [0.24485390, 0.74702712, 0.74702714],
+    [0.49931984, 1.00212309, 0.49931985], [0.75115432, 1.24873039, 0.75115431],
+    [0.49931984, 0.49931984, 1.00212309], [0.75115432, 0.75115431, 1.24873038],
+    [0.99994427, 0.99994428, 0.99994427], [1.25090921, 1.25090920, 1.25090921],
+]) * A
+
 CASES = {
     "unrelaxed": dict(
         positions="/projects/u6em/parv/diamond/unpaired/unrelaxed/pp/inference/positions",
@@ -96,6 +109,15 @@ CASES = {
         n_particles=98,                 # 49 up + 48 down + 1 muon
         n_up=49,
         n_dn=48,
+    ),
+    # Second BC-relaxed PP run (open-shell DFT geometry), training job's own
+    # inference dir. particles=(33,32,1)=66, muon = last particle.
+    "bc_relaxed_pp_relax_2": dict(
+        positions="/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_relax_2/inference/positions",
+        carbons=C_BC_RELAXED_2,
+        lattice_a=6.74,
+        # Relaxed bond is C0-C1 (pushed apart about the bond centre).
+        bc_pair=(0, 1),
     ),
     "silicon": dict(
         positions="/projects/u6em/parv/silicon_unpaired/unrelaxed/inference/positions",
