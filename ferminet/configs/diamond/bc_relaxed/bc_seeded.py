@@ -102,10 +102,11 @@ def get_config():
     cfg.pretrain.iterations = 0
     cfg.log.restore_path = "train"
 
-    # EXP-002: seed the muon (last particle) walkers at the relaxed BC midpoint.
-    # BC = midpoint of relaxed C0 (-0.05139*a) and C1 (0.30149*a) => 0.125047*a
-    # = 0.84282 bohr per component (bohr cartesian, same frame as the molecule).
-    cfg.mcmc.muon_init_coord = (0.84282, 0.84282, 0.84282)
+    # EXP-002: seed the muon (last particle) walkers at the BC site. Same
+    # convention as the molecule coords above (fractions of a, *a -> bohr): the
+    # DFT muon (H) sat at (0.125, 0.125, 0.125)*a, i.e. the midpoint of relaxed
+    # C0 (-0.05139*a) and C1 (0.30149*a). bohr cartesian, molecule frame.
+    cfg.mcmc.muon_init_coord = (0.125*a, 0.125*a, 0.125*a)
     cfg.mcmc.muon_init_width = 0.3   # tight Gaussian about BC
 
     return cfg
