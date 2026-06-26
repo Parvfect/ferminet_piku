@@ -1047,6 +1047,10 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         append=need_append)
   with writer_manager as writer:
     positions_savepath = os.path.join(cfg.log.save_path, "positions")
+    if cfg.observables.positions:
+      # Create the positions dir up front; the per-step writer below assumes it
+      # exists (exist_ok handles the dir already existing / multi-host races).
+      os.makedirs(positions_savepath, exist_ok=True)
     # Main training loop
     num_resets = 0  # used if reset_if_nan is true
 
