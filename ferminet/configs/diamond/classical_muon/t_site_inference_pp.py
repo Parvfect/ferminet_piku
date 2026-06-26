@@ -138,6 +138,8 @@ if __name__ == '__main__':
     
     cfg.observables.srpd.calculate = True
     cfg.observables.srpd.use_fixed_origin = True # Relative to coord origin
+    # Also dump raw muon/electron positions (first 1000 steps) -> save_path/positions.
+    cfg.observables.positions = True
 
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
