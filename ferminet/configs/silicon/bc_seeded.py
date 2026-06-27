@@ -110,7 +110,12 @@ def get_config():
     # BC = midpoint of relaxed Si0 (-0.04346*a) and Si8 (0.29346*a) = 0.125*a per
     # component. bohr cartesian, molecule frame.
     cfg.mcmc.muon_init_coord = (0.125*a, 0.125*a, 0.125*a)
-    cfg.mcmc.muon_init_width = 0.3   # tight Gaussian about BC
+    # Width scaled up from diamond's 0.3 by the BC->host half-bond ratio
+    # (Si 2.99 / C 2.06 ~ 1.45) so the seed cloud covers the SAME fraction of the
+    # (larger) silicon BC basin and keeps equal clearance to the BC->T watershed
+    # (~1.6 bohr margin to the 2.99-bohr half-bond). Still below silicon's likely
+    # equilibrium spread (~0.6-0.8 bohr), so the cloud relaxes outward, not in.
+    cfg.mcmc.muon_init_width = 0.45  # Gaussian about BC (silicon-scaled)
 
     return cfg
 
