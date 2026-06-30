@@ -59,6 +59,36 @@ C_UNRELAXED = diamond_fractional_cell(6.74)
 # Ideal silicon, a=10.26 (same fractional structure, larger cell).
 SI_UNRELAXED = diamond_fractional_cell(10.26)
 
+# DFT-relaxed silicon (unpaired-electron muon at BC), from
+# configs/silicon/inference_bc_relaxed.py. Si #0 and #8 flank the muon and move
+# ~0.77 bohr outward along [111] (+34.8% Si-Si bond). Midpoint of Si0-Si8 = BC.
+SI_BC_RELAXED = np.array([
+    [-0.043460, -0.043460, -0.043460], [0.505552, 0.505552, -0.005961],
+    [-0.005961, 0.505552, 0.505552], [0.505552, -0.005961, 0.505552],
+    [0.499147, 1.002493, 0.499147], [1.002493, 0.499147, 0.499147],
+    [0.499147, 0.499147, 1.002493], [1.000592, 1.000592, 1.000592],
+    [0.293460, 0.293460, 0.293460], [0.744446, 0.744446, 0.255961],
+    [0.255961, 0.744446, 0.744446], [0.744446, 0.255961, 0.744446],
+    [0.750851, 1.247504, 0.750851], [1.247504, 0.750851, 0.750851],
+    [0.750851, 0.750851, 1.247504], [1.249406, 1.249405, 1.249405],
+]) * 10.26
+
+# DFT-relaxed silicon (T-relaxed: unpaired-electron muon at the tetrahedral
+# interstitial (0.75,0.75,0.75)*a), from configs/silicon/inference_t_relaxed.py.
+# Relaxation is small: only the 4 Si coordinating the muon move ~0.0487 bohr
+# inward (-1.1% T-cage contraction). Si0=(0,0,0)-ish, Si8=(0.25,..)-ish; their
+# midpoint is the BC site (used only to give the classifier a bond length).
+SI_T_RELAXED = np.array([
+    [-0.00067502, -0.00067507, -0.00067507], [0.50067447, 0.50067444, -0.00067510],
+    [-0.00067507, 0.50067440, 0.50067444], [0.50067443, -0.00067511, 0.50067443],
+    [0.50273842, 0.99725963, 0.50273848], [0.99725956, 0.50273849, 0.50273853],
+    [0.50273848, 0.50273854, 0.99725958], [0.99725948, 0.99725952, 0.99725955],
+    [0.24999972, 0.24999967, 0.24999969], [0.74999906, 0.74999903, 0.24997919],
+    [0.24997923, 0.74999905, 0.74999903], [0.74999907, 0.24997917, 0.74999902],
+    [0.74999898, 1.25001884, 0.74999901], [1.25001885, 0.74999897, 0.74999902],
+    [0.74999903, 0.74999902, 1.25001882], [1.24999827, 1.24999842, 1.24999838],
+]) * 10.26
+
 # DFT-relaxed C atoms around the bond centre (from inference_pp.py).
 C_BC_RELAXED = np.array([
     [-0.04975306, -0.04975303, -0.04975303], [0.29984779, 0.29984777, 0.2998478],
@@ -82,6 +112,21 @@ C_BC_RELAXED_2 = np.array([
     [0.49931984, 1.00212309, 0.49931985], [0.75115432, 1.24873039, 0.75115431],
     [0.49931984, 0.49931984, 1.00212309], [0.75115432, 0.75115431, 1.24873038],
     [0.99994427, 0.99994428, 0.99994427], [1.25090921, 1.25090920, 1.25090921],
+]) * A
+
+# DFT-relaxed C atoms around the T-site (from configs/diamond/t_relaxed/pp.py).
+# Muon at the tetrahedral interstitial (~0.7503,0.7503,0.7503)*a; the 4 coordinating
+# C (#4-#7) move OUTWARD ~0.011-0.015 bohr -> +0.4% T-cage EXPANSION (contrast
+# silicon's -1.1% contraction). Diamond should hold the relaxed T-site unseeded.
+C_T_RELAXED = np.array([
+    [-0.00060074, -0.00060073, -0.00060074], [0.50079041, 0.50079041, -0.00060075],
+    [-0.00060075, 0.50079041, 0.50079041], [0.50079041, -0.00060074, 0.50079041],
+    [0.49925985, 1.00130914, 0.49925985], [1.00130915, 0.49925984, 0.49925984],
+    [0.49925985, 0.49925984, 1.00130916], [1.00130912, 1.00130911, 1.00130912],
+    [0.25009483, 0.25009485, 0.25009484], [0.75028450, 0.75028450, 0.24443754],
+    [0.24443755, 0.75028450, 0.75028450], [0.75028450, 0.24443755, 0.75028449],
+    [0.75028449, 1.25613144, 0.75028448], [1.25613144, 0.75028449, 0.75028447],
+    [0.75028448, 0.75028449, 1.25613145], [1.25047415, 1.25047414, 1.25047416],
 ]) * A
 
 CASES = {
@@ -119,11 +164,49 @@ CASES = {
         # Relaxed bond is C0-C1 (pushed apart about the bond centre).
         bc_pair=(0, 1),
     ),
+    # BC-SEEDED quantum muon (EXP-002): same open-shell BC-relaxed geometry as
+    # bc_relaxed_pp_relax_2, but the muon was seeded AT the BC site at init to
+    # test whether it holds BC or drifts to the off-T trap. particles=(33,32,1)=66.
+    "bc_seeded": dict(
+        positions="/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_bc_seeded/inference/positions",
+        carbons=C_BC_RELAXED_2,
+        lattice_a=6.74,
+        bc_pair=(0, 1),
+    ),
     "silicon": dict(
         positions="/projects/u6em/parv/silicon_unpaired/unrelaxed/inference/positions",
         carbons=SI_UNRELAXED,
         lattice_a=10.26,
         # Ideal silicon, BC site = midpoint of Si0-Si8 bond.
+        bc_pair=(0, 8),
+    ),
+    # Silicon BC-relaxed quantum muon (unpaired-electron, DFT-relaxed geometry).
+    # Si0 & Si8 flank the muon; their midpoint = BC. particles=(33,32,1)=66.
+    "silicon_bc_relaxed": dict(
+        positions="/projects/u6em/parv/silicon_unpaired/bc_relaxed/inference/positions",
+        carbons=SI_BC_RELAXED,
+        lattice_a=10.26,
+        bc_pair=(0, 8),
+    ),
+    # Silicon T-relaxed quantum muon (EXP-003): DFT-relaxed geometry with the
+    # muon at the tetrahedral interstitial. Tests whether the relaxed-T silicon
+    # muon forms a bound state (muonium) — run mode 'srpd' for the spin-resolved
+    # contact density, 'spread' for localisation. particles=(33,32,1)=66.
+    "silicon_t_relaxed": dict(
+        positions="/projects/u6em/parv/silicon_unpaired/t_relaxed/inference/positions",
+        carbons=SI_T_RELAXED,
+        lattice_a=10.26,
+        bc_pair=(0, 8),
+    ),
+    # Diamond T-relaxed quantum muon (diamond analogue of EXP-003): DFT-relaxed
+    # geometry, T-cage EXPANDED +0.4%. KEY question — does the quantum muon localise
+    # in the relaxed (expanded) cage WITHOUT seeding (it should, unlike silicon's
+    # contracted cage which the muon fled)? Run 'site'/'spread' for localisation,
+    # 'srpd' for the muonium contact density. particles=(33,32,1)=66.
+    "diamond_t_relaxed": dict(
+        positions="/projects/u6em/parv/diamond/unpaired/t_relaxed/pp/inference/positions",
+        carbons=C_T_RELAXED,
+        lattice_a=6.74,
         bc_pair=(0, 8),
     ),
     # Classical muon: muon is a fixed H nucleus, NOT a particle. Positions hold
@@ -169,19 +252,44 @@ def load_muons(positions_dir, n_particles=N_PARTICLES, muon_idx=None):
     return np.concatenate(chunks, axis=0), len(files)
 
 
-def site_report(name, p, carbons, bc_site):
-    """Print nearest carbons and distance to the intended BC site for point p."""
+def site_report(name, p, carbons, bc_site, bond=None):
+    """Print nearest carbons and distance to the intended BC site for point p.
+
+    Classification (bond = the BC-pair bond length; half-bond hb = bond/2):
+      * BOND-CENTRE: the TWO nearest carbons both sit at ~half-bond AND there is a
+        clear gap to the 3rd (a symmetric BC has its two bonding carbons nearly
+        equidistant, so the gap to watch is 2nd->3rd, NOT 1st->2nd).
+      * OFF-CENTRE / near a single carbon: one carbon much closer than the rest
+        (1st->2nd gap large) -> the off-T trap, not a true BC.
+      * TETRAHEDRAL: 4 roughly equidistant carbons, all well beyond half-bond.
+    Falls back to the old heuristic if no bond length is supplied."""
     d = np.array([np.linalg.norm(min_image(p - c)) for c in carbons])
     order = np.argsort(d)
+    d0, d1, d2, d3 = d[order[:4]]
     print(f"\n[{name}] Cartesian {np.round(p, 3)} bohr  cubic-frac {np.round(p / A, 3)}")
     print(f"  distance to intended BC site: {np.linalg.norm(min_image(p - bc_site)):.3f} bohr")
     nearest = [(int(i), round(float(d[i]), 3)) for i in order[:4]]
     print(f"  4 nearest C atoms (idx, bohr): {nearest}")
-    # BC site => 2 close carbons at ~half the bond length; T site => 4 roughly equal.
-    if d[order[1]] - d[order[0]] > 0.5 and d[order[0]] < 2.3:
-        print("  -> looks like a BOND-CENTRE site (2 close carbons)")
+    if bond is None:
+        # Legacy heuristic (gap between 1st and 2nd nearest); kept for safety.
+        if d1 - d0 > 0.5 and d0 < 2.3:
+            print("  -> looks like a BOND-CENTRE site (2 close carbons)")
+        else:
+            print("  -> looks like a TETRAHEDRAL (T) site (4 roughly equidistant carbons)")
+        return
+    hb = bond / 2.0
+    near_hb = lambda x: abs(x - hb) < 0.5          # within 0.5 bohr of half-bond
+    if near_hb(d0) and near_hb(d1) and (d2 - d1) > 0.4:
+        print(f"  -> looks like a BOND-CENTRE site (2 carbons at ~half-bond {hb:.2f}, "
+              f"gap {d2 - d1:.2f} bohr to the rest)")
+    elif (d1 - d0) > 0.5:
+        print(f"  -> looks like an OFF-CENTRE site (1 close carbon at {d0:.2f}, "
+              f"next at {d1:.2f} bohr) — NOT a true bond-centre")
+    elif (d3 - d0) < 0.6:
+        print(f"  -> looks like a TETRAHEDRAL (T) site (4 carbons within "
+              f"{d3 - d0:.2f} bohr of each other)")
     else:
-        print("  -> looks like a TETRAHEDRAL (T) site (4 roughly equidistant carbons)")
+        print("  -> ambiguous interstitial site (does not match BC / off-centre / T)")
 
 
 def muon_spread(case_name):
@@ -334,8 +442,8 @@ def analyse(case_name):
     peak_frac = np.array([(edges[k][idx[k]] + edges[k][idx[k] + 1]) / 2 for k in range(3)])
     peak_cart = peak_frac @ L
 
-    site_report("circular mean", mean_cart, carbons, bc_site)
-    site_report("histogram peak", peak_cart, carbons, bc_site)
+    site_report("circular mean", mean_cart, carbons, bc_site, bond)
+    site_report("histogram peak", peak_cart, carbons, bc_site, bond)
 
     # Localisation: fraction of (subsampled) muons near the histogram peak.
     sub = muons[::50]

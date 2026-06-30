@@ -1,0 +1,27 @@
+# Memory Index
+
+- [Research goal: muon site](memories/research_goal_muon_site.md) — standing goal: verify SRPD shows muon at BC site (relaxed) / T or BC site (unrelaxed)
+- [Current status](memories/current_status.md) — latest session snapshot: pp_T_inf job status, what we're working on now (update each session)
+- [T-relaxed runs](memories/project_t_relaxed_runs.md) — silicon T-relaxed pair SUBMITTED (jobs 5334500/5334501); diamond T-relaxed pair RUN NOT STARTED (start after silicon)
+- [diamond T-relaxed muon result](memories/project_diamond_t_relaxed_muon_result.md) — ★ diamond q-muon HOLDS expanded relaxed T-cage (centered, +0.017 bohr expansion, no seeding) AND is MUONIUM; opposite of silicon which fled its contracted cage
+- [bc_seeded muon result (EXP-002 KEY)](memories/project_bc_seeded_muon_result.md) — ★ BC-seeded diamond q-muon HOLDS bond-centre (0.30 bohr from BC, oblate on [111] bond, diamagnetic, SRPD matches classical-BC); same geometry unseeded → off-T (4.06 bohr). PROVES off-T was an init trap
+- [bc_relaxed pp_relax_2 muon result](memories/project_bc_relaxed_pp_relax_2_muon_result.md) — FermiNet muon trapped at off-T; classical DFT proves BC is the true min, 1.90 eV (70 mHa) BELOW off-T (watershed=C1). off-T is a sampling trap; init-trap hunch CONFIRMED
+- [bc_relaxed pp_new muon result](project_bc_relaxed_pp_new_muon.md) — Quantum muon localised at T-site (not BC site) in bc_relaxed pp_new inference; 2.74 bohr from nearest BC midpoint
+- [silicon bc_relaxed muon result](memories/project_silicon_bc_relaxed_muon_result.md) — silicon bc_relaxed (UNSEEDED) muon does NOT hold BC: drifts ~4.4 bohr to near-symmetric T cage, diamagnetic, loose 0.87 bohr spread. Different site from diamond off-T. Motivates silicon bc_seeded #15
+- [bc_relaxed pp muon result](memories/project_bc_relaxed_pp_muon_result.md) — bc_relaxed pp muon at T-site (NOT relaxed BC, 7.1 bohr away); spread 0.60 bohr isotropic; SRPD weak muonium (~1.3:1, intermediate diamond↔silicon)
+- [bc_relaxed nopp muon result](memories/project_bc_relaxed_nopp_muon_result.md) — all-electron bc_relaxed muon at T-site; RMS 0.38 bohr; SRPD DIAMAGNETIC (not muonium) — contrast with PP runs; bin-0 g(r) spike is a 1-count artifact
+- [unrelaxed pp muon result](memories/project_unrelaxed_pp_muon_result.md) — unrelaxed diamond muon at ideal T-site; spread RMS 0.56 bohr isotropic; SRPD shows MUONIUM (strong spin-up contact density). All 3 diamond runs → T-site. Script: tools/muon_site_analysis.py
+- [silicon quantum muon result](memories/project_silicon_quantum_muon_result.md) — silicon q-muon at T-like site; spread RMS 0.84 bohr ANISOTROPIC; SRPD unpolarised (DIAMAGNETIC, no muonium) — key contrast with diamond. Classical (fixed-H) SRPD matches quantum.
+- [diamond classical BC muon result](memories/project_diamond_classical_bc_muon_result.md) — pp_T classical muon fixed at BC site: DIAMAGNETIC, dense bonding charge (~0.79 e⁻/bohr). Muonium in diamond is a T-site property, not BC.
+- [Energy convergence tool](memories/tool_energy_convergence.md) — tools/energy_convergence.py: VMC energy convergence via block-avg + trailing-window drift/slope test on train_stats.csv
+- [Diamond PP energy comparison](memories/project_diamond_pp_energy_comparison.md) — GSE table for all 5 diamond PP runs; #4/#6/#5 frozen (reuse), only re-run active #7/#8; classical≠quantum caveat
+- [Diamond #6 vs #8 matched-step](memories/project_diamond_unrelaxed_vs_bcrel2_matched_step.md) — at equal steps #8 bc_rel_2 is LOWER than #6 unrelaxed; #6<#8 final-plateau verdict is premature until #8 hits ~500k
+- [Silicon PP energy comparison](memories/project_silicon_pp_energy_comparison.md) — GSE table for 3 silicon PP runs; #2/#1 frozen (reuse), only re-run active #9 (needs robust outlier-reject estimate, tool gives garbage); classical≠quantum caveat
+- [Convergence snapshot](memories/project_convergence_snapshot.md) — 2026-06-17 plateau energies + converged/drifting status for all 7 production runs (dated; re-run to refresh)
+- [Python env](feedback_python_env.md) — Use ferminet-piku conda env for analysis scripts
+- [Mark active runs with ★](memories/feedback_mark_active_runs_with_star.md) — in run/energy comparison tables, star the still-training runs (user likes this)
+- [Training monitoring](memories/training_monitoring.md) — 8 production job configs (4 ACTIVE / 4 CLOSED as of 2026-06-18): scripts, logs, job names, squeue/queue routine; afterany dependency chaining for same-day follow-ups
+- [Job save paths](memories/job_save_paths.md) — cfg.log.save_path (project dir w/ train_stats.csv + checkpoints) for each of the 7 production jobs
+- [Potential bugs](memories/potential_bugs.md) — silicon unrelaxed-q has permanently NaN ewvar (train.py:1086 isnan vs isfinite); fix deferred until safe
+- [Unpaired electron inference sync](memories/project_unpaired_electron_inference_sync.md) — 6 inference configs updated to match +1 up-spin training configs (particles, geometry, save_path)
+- [QE BC relaxation (diamond)](memories/qe_bc_relaxation_diamond.md) — QE relax of muon(H) at BC site in ~/qe/diamond_test; added unpaired-electron spin-polarized version (bc_2_relax_unpaired.in) to match FermiNet doublet
