@@ -24,9 +24,21 @@ keep this ★-on-active convention ([[feedback-mark-active-runs-with-star]]).
 | #8 bc_rel_2 NEW | quantum | bc_relaxed (charged-state, more-expanded BC) | `bc_relaxed/pp_relax_2` | 280k (frozen) | **−90.66904 ± 0.00029** | **STOPPED/COMPLETED 2026-06-24 @280196** (muon localised OFF-T not BC; was still −1.5e-7/step) |
 | #6 unrelaxed | quantum | unrelaxed | `unrelaxed/pp` | 522k (frozen) | **−90.66312 ± 0.00017** | CONVERGED (frozen) |
 | #5 bc OLD | quantum | bc_relaxed (original) | `bc_relaxed/pp` | 336k (frozen) | **−90.59794 ± 0.00151** | plateaued/noise-limited, CLOSED (frozen) |
-| #12 t_relaxed ★ | quantum | t_relaxed | `t_relaxed/pp` | 232k | **−90.63158 ± 0.00038** | RUNNING, NOT CONVERGED still descending (−2.6e-7/step) — not a settled GSE |
-| #14 bc_seeded ★ | quantum | bc_relaxed (BC-seeded muon, EXP-002) | `bc_relaxed/pp_bc_seeded` | 176k | **−90.64681 ± 0.00070** | RUNNING, NOT CONVERGED still descending (−4.7e-7/step); now ~22 mHa from #8 off-T; muon HOLDS BC ([[project-bc-seeded-muon-result]]) |
-| #13 classical t_rel ★ | fixed @ T | t_relaxed | `classical/t_relaxed/pp` | 74k | **−90.50608 ± 0.00507** | RUNNING, warm-up, descending fast (−3.8e-6/step) — not settled |
+| #12 t_relaxed ★ | quantum | t_relaxed | `t_relaxed/pp` | 352k | **−90.65002 ± 0.00032** | DEAD 2026-07-01 (node abort), NOT CONVERGED still descending (−1.4e-7/step) — not resubmitted per user |
+| #14 bc_seeded ★ | quantum | bc_relaxed (BC-seeded muon, EXP-002) | `bc_relaxed/pp_bc_seeded` | 269.6k | **−90.67340 ± 0.00037** | DEAD 2026-07-01 (node abort), NOT CONVERGED still descending (−1.8e-7/step); **CROSSED #8 off-T −90.669, now ~4.5 mHa BELOW**; muon HOLDS BC ([[project-bc-seeded-muon-result]]) |
+| #13 classical t_rel ★ | fixed @ T | t_relaxed | `classical/t_relaxed/pp` | 198k | **−90.66204 ± 0.00045** | DEAD 2026-07-01 (node abort), NOT CONVERGED still descending (−3.2e-7/step) |
+
+UPDATE 2026-07-01: ALL diamond active jobs DEAD (queue empty; follow-ups FAILED exit 6:0 node
+abort ~08:23–08:34, not clean TIMEOUT; ckpts intact; NOT resubmitted per user). **★ #14
+bc_seeded @269.6k = −90.67340 ± 0.00037 (−1.8e-7/step) has CROSSED #8 off-T −90.669 — now
+~4.5 mHa BELOW it, so the BC-holding muon is lower-E than the off-T trap (verdict favours BC).**
+#12 t_relaxed @352k = −90.65002 ± 0.00032 (−1.4e-7/step, descending). #13 classical t_rel
+@198k = −90.66204 ± 0.00045 (−3.2e-7/step, descending). None converged.
+
+UPDATE 2026-06-30 (#3): #14 bc_seeded @232k = −90.66724 ± 0.00044 (−2.0e-7/step, still
+descending), now only ~1.8 mHa from #8 off-T −90.669 — about to cross it. #12 t_relaxed @316k
+= −90.64729 ± 0.00041 (−2.4e-7/step, descending). #13 classical t_rel @161k = −90.64973 ±
+0.00048 (−6.0e-7/step, descending). None converged.
 
 UPDATE 2026-06-30 (#2): #14 bc_seeded @218k = −90.66541 ± 0.00045 (−3.5e-7/step,
 still descending), now only ~3.6 mHa from #8 off-T −90.669 — closing on a BC-vs-off-T

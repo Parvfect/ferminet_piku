@@ -109,6 +109,16 @@ The others are **closed** (do NOT auto-resubmit closed ones during the daily
 check — only resubmit the active set, and mention closed ones only if the user
 asks to reopen them).
 
+2026-07-01: **ALL 6 active jobs DEAD, queue EMPTY.** The last follow-ups FAILED with
+exit `6:0` (task/node abort), NOT clean TIMEOUT, all within ~08:23–09:20 UTC ⇒ a
+cluster/node event, not per-run bugs. Ckpts + train_stats intact. **User said don't
+submit new jobs → NOT resubmitted.** To relaunch later: plain `sbatch <script>` from each
+config's submit dir (resumes from latest ckpt). Latest energies (all NOT converged) in the
+two comparison memories; highlights: **★ #14 diamond bc_seeded @269.6k −90.67340 CROSSED #8
+off-T (−90.669), now ~4.5 mHa below** (BC lower-E than off-T trap); **★ #15 Si bc_seeded @82k
+−62.85292 FULLY RECOVERED** (back in normal Si range). Also: admin cancelled two inference
+jobs (5451338/5451339) 06:56 — account-migration housekeeping.
+
 2026-06-29: 6 active jobs RUNNING, queue had NO pending follow-ups (06-28's
 follow-ups had taken over as the running jobs). Requeued one afterany each:
 **current running job → its new follow-up:** #10 5402683→5415382, #11

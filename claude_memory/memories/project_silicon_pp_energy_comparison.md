@@ -20,13 +20,26 @@ Always keep this ★-on-active convention ([[feedback-mark-active-runs-with-star
 | Run | Muon | Geometry | save_path tail | Step | Plateau E (E_h) | Status (as of 2026-06-27) |
 |---|---|---|---|---|---|---|
 | #2 classical T-site | fixed @ T | unrelaxed | `classic` | 224k (frozen) | **−62.91337 ± 0.00015** | FINISHED/cancelled @223695 (frozen; slope still slightly down at end) |
-| #11 t_relaxed ★ | fixed @ T | t_relaxed | `classical/t_relaxed` | 132k | **−62.90594 ± 0.00032** | RUNNING, still descending (−2.1e-7/step), ~8 mHa from frozen #2 |
+| #11 t_relaxed ★ | fixed @ T | t_relaxed | `classical/t_relaxed` | 200k | **−62.91709 ± 0.00016** | DEAD 2026-07-01 (node abort), NOT CONVERGED (−8.0e-8/step), ~4 mHa BELOW frozen #2; not resubmitted per user |
 | #9 bc_relaxed | quantum | bc_relaxed (charged-state, Si pushed ~0.77 bohr along [111]) | `bc_relaxed` | 138k (frozen) | **−62.86382 ± 0.00012** (slope ~flat −4e-7) | **STOPPED 2026-06-27 @138000 (frozen)** — matched #1 unrelaxed (~0.2 mHa); muon drifted to T cage so closed |
 | #1 unrelaxed | quantum | unrelaxed | `unrelaxed` | 180k (frozen) | **−62.86151 ± 0.00047** | CLOSED/cancelled @180000 (frozen; was still drifting down) |
 | #10 t_relaxed | quantum | t_relaxed | `t_relaxed` | 138k (frozen) | **−62.87133 ± 0.00048** @130k | **STOPPED 2026-06-29** — muon avoided relaxed cage (EXP-003); apparent ~10 mHa edge over #1 was convergence-inflated (matched-step classical #11-vs-#2 ⇒ true relaxation E ≈5–6 mHa). Superseded by T-seeded #17 |
-| #17 t_seeded ★ | quantum | t_relaxed (T-seeded) | `t_seeded` | — | — (job 5419590, just launched) | RUNNING/fresh — EXP-003b, muon seeded at relaxed T-site (0.75a)³ width 0.5 |
-| #15 bc_seeded ★ | quantum | bc_relaxed (BC-seeded muon, EXP-002) | `bc_seeded` | 54k | **−62.19466 ± 0.04245** ⚠️ DRIFTING UP | RUNNING, fresh-net warm-up REGRESSING (slope +2.1e-5/step) — see flag |
+| #17 t_seeded ★ | quantum | t_relaxed (T-seeded) | `t_seeded` | 55.8k | **−62.80028 ± 0.00379** | DEAD 2026-07-01 (node abort), fresh-net still climbing (−2.8e-6/step) — EXP-003b, muon seeded at relaxed T-site (0.75a)³ width 0.5 |
+| #15 bc_seeded ★ | quantum | bc_relaxed (BC-seeded muon, EXP-002) | `bc_seeded` | 82k | **−62.85292 ± 0.00128** | DEAD 2026-07-01 (node abort); ✅ FULLY RECOVERED, back in normal Si quantum range (~−62.86), regression gone |
 | #16 classical BC | fixed @ BC | bc_relaxed | `classical/bc_relaxed` (planned) | — | — | NOT STARTED — config/script not yet written (silicon analogue of diamond #4) |
+
+UPDATE 2026-07-01: ALL silicon active jobs DEAD (queue empty; follow-ups FAILED exit 6:0 node
+abort ~08:44/09:01/09:20, not clean TIMEOUT; ckpts intact; NOT resubmitted per user). #11
+classical t_rel @200k = −62.91709 ± 0.00016 (−8.0e-8/step), ~4 mHa below frozen #2 −62.91337.
+**✅ #15 bc_seeded FULLY RECOVERED** — @82k = −62.85292 ± 0.00128 (−9.5e-7/step), back in the
+normal Si quantum range (~−62.86), post-blowup regression gone. #17 t_seeded @55.8k =
+−62.80028 ± 0.00379 (−2.8e-6/step, fresh-net climbing fast). None converged.
+
+UPDATE 2026-06-30 (#3): #11 classical t_rel @179.7k = −62.91549 ± 0.00023 (−1.2e-7/step),
+~2 mHa BELOW frozen #2 −62.91337. **✅ #15 bc_seeded recovery STILL HOLDING** — @60k =
+−62.83710 ± 0.00029 descending cleanly (−2.3e-6/step), no re-blow-up; ~30 mHa from proper Si
+GSE. #17 t_seeded @34k = −62.75416 ± 0.00037 (−7.7e-6/step, fresh-net climbing fast). None
+converged.
 
 UPDATE 2026-06-30 (#2): #11 classical t_rel @172k = −62.91564 ± 0.00024 (−1.8e-7/step),
 now ~2 mHa BELOW frozen #2 −62.91337 (both noise-level). **✅ #15 bc_seeded recovery

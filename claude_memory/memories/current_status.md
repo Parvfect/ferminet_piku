@@ -7,7 +7,52 @@ metadata:
   originSessionId: cd7babd3-df02-4561-aef6-eb933702fa94
 ---
 
-## As of 2026-06-30 (LATEST, branch `af`) — daily check #2: 6 RUNNING healthy w/ follow-ups; #15 recovery holding; classical-BC inference DONE @338k
+## As of 2026-07-01 (LATEST, branch `af`) — daily check: QUEUE EMPTY, all 6 active jobs DEAD (node aborts); #14 CROSSED #8 off-T; #15 fully recovered; did NOT resubmit (user said don't)
+
+**Nothing running.** `squeue` empty. All six active jobs are dead — the last follow-ups
+**FAILED with exit `6:0` (task/node abort), NOT clean TIMEOUT**, between ~08:23–09:20 UTC
+2026-07-01 (5431922 #11 08:44, 5431923 #12 08:34, 5431924 #13 08:29, 5431925/5440929 #14
+08:23–08:25, 5426316 #15 09:01, 5426218/5440930 #17 09:18–09:20). Several died in the same
+~1h window ⇒ looks like a cluster/node event, not per-run bugs. Checkpoints + train_stats
+all INTACT (energies below read cleanly) → a plain `sbatch` from each submit dir will resume
+from latest ckpt. **User said DON'T submit new jobs → I did NOT resubmit anything.** Two
+inference jobs (5451338 si bc_seeded_inf, 5451339 si c_t_relaxed_inf) were CANCELLED-by-admin
+06:56 (account migration housekeeping, per 723892f "before Isambard account migration").
+
+**Energies (clean block-avg via energy_convergence.py, NONE converged):**
+- #11 si c t_rel @200k −62.91709 ± 0.00016 (−8.0e-8/step), ~4 mHa below frozen #2 −62.91337
+- #12 d q t_rel @352k −90.65002 ± 0.00032 (−1.4e-7/step, descending)
+- #13 d c t_rel @198k −90.66204 ± 0.00045 (−3.2e-7/step, descending)
+- #14 d bc_seed @269.6k **−90.67340 ± 0.00037** (−1.8e-7/step) **★ CROSSED #8 off-T (−90.669) — now ~4.5 mHa BELOW it**
+- #15 si bc_seed @82k **−62.85292 ± 0.00128** (−9.5e-7/step) **★ fully RECOVERED, back in normal Si quantum range (~−62.86)**
+- #17 si t_seed @55.8k −62.80028 ± 0.00379 (−2.8e-6/step, fresh-net climbing fast)
+
+**★ #14 diamond bc_seeded has now CROSSED #8 off-T** (−90.67340 vs −90.669, ~4.5 mHa BELOW,
+still descending): the BC-holding quantum muon is now LOWER in energy than the off-T trap —
+the BC-vs-off-T energy verdict is landing in BC's favour, consistent with the classical PES.
+**★ #15 Si bc_seeded fully recovered** (−62.837→−62.853), post-blowup regression gone.
+Tables refreshed in both comparison memories. **Repo memory backup `claude_memory/` synced +
+pushed this session** (was stale: missing project_silicon_bc_seeded_muon_result.md + old
+current_status/energy tables).
+
+## As of 2026-06-30 (branch `af`) — daily check #3: 6 RUNNING healthy; queued #14/#17 follow-ups; #14 ~1.8 mHa from #8 off-T; #15 recovery still holding
+
+**Daily check.** 6 active jobs RUNNING, all healthy (≤7 NaN/last-2000-rows = warm-up only).
+#11/#12/#13 had pending afterany follow-ups (5431922/23/24); #15→5426316 already had one;
+**#14 (5431925) and #17 (5426218) were running on their former follow-ups with NO continuation
+→ queued 5440929 (#14, dep afterany:5431925) and 5440930 (#17, dep afterany:5426218).**
+
+**Energies (block-avg, none converged):** #11 si c t_rel @179.7k −62.91549 ±0.00023 (−1.2e-7,
+now ~2 mHa BELOW frozen #2 −62.91337); #12 d q t_rel @316k −90.64729 ±0.00041 (−2.4e-7,
+descending); #13 d c t_rel @161k −90.64973 ±0.00048 (−6.0e-7, descending); #14 d bc_seed @232k
+−90.66724 ±0.00044 (−2.0e-7), **now only ~1.8 mHa from #8 off-T −90.669**; #15 si bc_seed @60k
+−62.83710 ±0.00029 (−2.3e-6); #17 si t_seed @34k −62.75416 ±0.00037 (−7.7e-6, fresh climbing).
+
+**★ #14 diamond bc_seeded about to cross #8 off-T (−90.669)** — closing on a BC-vs-off-T energy
+verdict. **★ #15 Si bc_seeded recovery STILL HOLDING** (−62.828→−62.837, descending cleanly, no
+re-blow-up). Tables refreshed in both comparison memories.
+
+## As of 2026-06-30 (branch `af`) — daily check #2: 6 RUNNING healthy w/ follow-ups; #15 recovery holding; classical-BC inference DONE @338k
 
 **Daily check.** 6 active jobs RUNNING, each ALREADY had a pending afterany follow-up
 (5431922 #11, 5431923 #12, 5431924 #13, 5431925 #14, 5426316 #15, 5426218 #17) →
