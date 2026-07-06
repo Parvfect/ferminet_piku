@@ -7,11 +7,10 @@
 #SBATCH --time=1-00:00:00
 hostname
 cd ~
-source ~/miniforge3/bin/activate
+source /home/u6em/parvfect.u6em/miniforge3/bin/activate
 conda activate ferminet-piku
 
 pwd
-cd ferminet_remote
 cd ferminet_piku
 
 export NVIDIA_TF32_OVERRIDE=0

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_d_cpp_t_rel
-#SBATCH --output=classical.out
+#SBATCH --job-name=muon_d_qpp_bc_rel_widebi_v3
+#SBATCH --output=muon_wide_burnin_v3.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00
@@ -23,4 +23,4 @@ IP_ADDR=$(ifconfig 2> /dev/null | awk '$1 == "inet" {print $2}' | head -n 2 | ta
 srun --nodes=8 \
      --gres=gpu:4 \
      --export=ALL \
-     python -u ferminet/configs/diamond/t_relaxed/classical.py --server_addr="$IP_ADDR:$PORT"
+     python -u ferminet/configs/diamond/bc_relaxed/wide_burnin.py --server_addr="$IP_ADDR:$PORT"

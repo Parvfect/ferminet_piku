@@ -11,6 +11,7 @@ comparable and decisions are traceable.
 | [001](EXP-001_muon_offT_vs_bc_classical.md) | Is the FermiNet off-T muon the true site, or a sampling trap? | **H0 rejected** — BC is the true minimum (1.90 eV below off-T); off-T is a trap. *Why* the optimiser selects off-T is unresolved. | 2026-06-24 |
 | [002](EXP-002_bc_seeded_muon_run.md) | BC-seeded quantum run — does the net hold BC or drain to off-T? | planned (awaiting verification) | 2026-06-24 |
 | [003](EXP-003_silicon_t_relaxed_bound_state.md) | Does the silicon T-relaxed quantum muon form a bound state (muonium)? | running (inference 5415683) | 2026-06-29 |
+| [004](EXP-004_muon_width_burnin_diffusion.md) | Does a wider muon proposal + longer burn-in un-trap the muon (off-T → BC) without seeding? | implemented, ready to run (H0 the likely prior — run as diagnostic) | 2026-07-06 |
 
 ## Template
 

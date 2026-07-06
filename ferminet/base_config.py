@@ -255,6 +255,13 @@ def default() -> ml_collections.ConfigDict:
           'muon_init_coord': None,
           # Gaussian width (bohr) about muon_init_coord. Only used if set.
           'muon_init_width': 0.5,
+          # Optional initial MCMC proposal width (bohr) for the muon (last
+          # particle) only. None => the muon starts at move_width like every
+          # other species. When set, the muon starts with this wider proposal
+          # while electrons keep move_width; each species still adapts its own
+          # width thereafter. Only applied when sample_all is False. See
+          # experiments/EXP-004_muon_width_burnin_diffusion.md.
+          'muon_move_width': None,
       },
       'network': {
           'network_type': 'ferminet',  # One of 'ferminet' or 'psiformer'.

@@ -970,9 +970,19 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
     if cfg.mcmc.sample_all:
       width_arr = jnp.asarray(cfg.mcmc.move_width)
     else:
-      width_arr = jnp.ones((len(cfg.system.particles),))*cfg.mcmc.move_width
+      width_arr = jnp.ones((len(cfg.system.particles),)) * cfg.mcmc.move_width
+      # EXP-004: optionally start the muon (last particle) with its own, wider
+      # proposal while the electrons keep cfg.mcmc.move_width. Each species then
+      # adapts its own width (see mcmc.mh_update / mcmc.update_mcmc_width).
+      if cfg.mcmc.muon_move_width is not None:
+        width_arr = width_arr.at[-1].set(cfg.mcmc.muon_move_width)
     mcmc_width = kfac_jax.utils.replicate_all_local_devices(width_arr)
-  
+
+  # EXP-004 guardrail: surface the actual initial per-species proposal width at
+  # startup (before burn-in), so a silently-inert muon_move_width -- or a
+  # restored/collapsed width -- is visible in the log immediately.
+  logging.info('Initial MCMC width per species: %s', np.asarray(mcmc_width)[0])
+
   if pmoves is None:
     if cfg.mcmc.sample_all:
       pmoves = np.zeros(cfg.mcmc.adapt_frequency)

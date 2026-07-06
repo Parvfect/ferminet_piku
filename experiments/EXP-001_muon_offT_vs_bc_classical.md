@@ -129,6 +129,58 @@ Tests that would resolve it:
 - **BC-seeded run** (walkers initialised at BC) — does the net *hold* the deeper BC
   basin (off-T was a trap) or drain to off-T regardless?
 
+## Follow-up (2026-07-06): checkpoint audit of the MCMC sampling mechanism
+
+Tested two sampling hypotheses for the off-T collapse directly from the
+`bc_relaxed/pp` checkpoints (`/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp`;
+tools: `tools/muon_width_check.py`, `tools/muon_diffusion_check.py`).
+
+**(A) "Steady-state muon proposal width collapses below the electrons" — FALSIFIED.**
+The per-species adapted width does the *opposite*: muon width settles at
+**0.24 bohr, ~2.85× the electron width** (0.084 bohr), muon acceptance a healthy
+**54%**. Same pattern in every run audited (diamond bc_seeded/unrelaxed/t_relaxed,
+silicon bc_seeded/unrelaxed): muon/e ratio 2.4–3.1, acceptance 51–54%. The naive
+`1/√m ≈ 0.07` intuition is wrong because width is set by *acceptance*, not the
+kinetic mass — one muon in a smooth interstitial pocket tolerates a larger step
+than electrons in the cusped many-body soup. The adapter is not pinning the muon.
+
+**(B) "The muon never reaches a diffuse (multi-basin) state" — CONFIRMED, and this
+is the real mechanism.** Tracking the muon *walker ensemble* spread over training:
+
+| step | ensemble spread (bohr) |
+|---|---|
+| 0 (random-C init) | ~5.5 (spread across the whole cell / many carbons) |
+| 2000 (first ckpt) | **0.15** (collapsed ~37× in the first 2000 opt steps) |
+| 10k / 40k / 120k→end | 0.20 / 0.33 / ~0.46 (slow intra-basin widening only) |
+
+The muon is diffuse *only* at the random init; it collapses to a single 0.15 bohr
+blob within the first ~2000 optimiser steps and **never re-diffuses** — thereafter
+it only rattles within one basin (~0.46 bohr, matching the ~0.54 bohr inference
+cloud). It commits to whichever basin its init walkers were nearest *before* it can
+weigh competing basins.
+
+**Why the collapse happens (width-adaptation LAG):** config defaults are
+`move_width=0.02`, `adapt_frequency=100`, `burn_in=100` steps, and **width does not
+adapt during burn-in** (`train.py:1172` `update_mcmc_width` is in the training loop
+only). So through the critical first ~2000 steps the muon proposal is stuck at
+~0.02–0.08 bohr — far too small to hop between basins — exactly while KFAC drives ψ
+to localise fastest. Width only reaches its healthy 0.24 bohr near ~100k steps, long
+after ψ has zeroed its amplitude everywhere but one basin; by then a larger proposal
+is useless (endpoint-only Metropolis rejects any hop into a now-empty basin).
+
+**Verdict refinement:** the off-T trap **is** a sampling/initialisation artifact, but
+a *transient early-time* one (proposal width lags ψ localisation), not a steady-state
+width collapse. This is consistent with H0-rejected (BC is the true site) and with why
+seeding (`muon_init_coord`, EXP-002) works — you must place amplitude in the right
+basin before ψ commits, because sampling never relocates it.
+
+**Cheap follow-up test (not yet run):** raise the *initial* muon proposal width
+and/or lengthen burn-in with width adaptation enabled, so the ensemble stays
+multi-basin long enough for the variational principle to select the lower (BC)
+basin on its own. If the site then flips off-T→BC without explicit seeding, the
+early-width lag is confirmed as *the* cause; if it re-collapses to off-T regardless,
+the single-peak selection is intrinsic to the optimiser.
+
 ## Next / current steps
 - **[done]** H-only DFT relaxations confirm the watershed: T-side start → off-T
   (frac 0.473, −295.46387 Ry); BC-side start → BC (frac 0.125, −295.60317 Ry).
