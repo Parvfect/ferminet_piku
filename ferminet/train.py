@@ -685,7 +685,20 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
         cfg.observables.srpd.use_fixed_origin,
         cfg.observables.srpd.origin_coord
     )
-  
+
+  if cfg.observables.anisotropic_hyperfine.calculate:
+    aniso_grids, (observable_states['anisotropic_hyperfine'],
+     observable_fns['anisotropic_hyperfine']) = observables.cal_anisotropic_hyperfine(
+        cfg.system.particles,
+        cfg.observables.anisotropic_hyperfine.rmax,
+        cfg.observables.anisotropic_hyperfine.nbins,
+        cfg.system.pbc.apply_pbc,
+        cfg.observables.anisotropic_hyperfine.r_search,
+        cfg.system.pbc.lattice_vectors,
+        cfg.observables.anisotropic_hyperfine.use_fixed_origin,
+        cfg.observables.anisotropic_hyperfine.origin_coord
+    )
+
   if cfg.observables.apmd.calculate:
     g_grids, pw_g, (observable_states['apmd'],
       observable_fns['apmd']) = observables.cal_apmd(
@@ -1137,6 +1150,23 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
               name = 'srpd_final.txt'
               with open(os.path.join(ckpt_save_path, name), 'w') as f:
                   np.savetxt(f, srpd_data.T, fmt='%.6f')
+
+      if cfg.observables.anisotropic_hyperfine.calculate:
+        observable_states['anisotropic_hyperfine'] = observable_data['anisotropic_hyperfine']
+        freq = cfg.observables.anisotropic_hyperfine.save_freq
+        if jax.process_index() == 0:
+          # Save the raw (2, N_COMPONENTS, nbins) accumulator; the D-tensor
+          # build + Laguerre fit run offline (ferminet_af). No averaging: the
+          # offline finalise divides rho_m by the accumulated count itself.
+          state = np.asarray(observable_data['anisotropic_hyperfine'])
+          if (t + 1) % freq == 0:
+              print("Saving file - anisotropic_hyperfine")
+              name = 'anisotropic_hyperfine_' + str((t + 1) // freq) + '.npz'
+              np.savez(os.path.join(ckpt_save_path, name),
+                       state=state, grids=np.asarray(aniso_grids))
+          if (t + 1) == cfg.optim.iterations:
+              np.savez(os.path.join(ckpt_save_path, 'anisotropic_hyperfine_final.npz'),
+                       state=state, grids=np.asarray(aniso_grids))
 
       if cfg.observables.apmd.calculate:
         observable_states['apmd'] = observable_data['apmd']
