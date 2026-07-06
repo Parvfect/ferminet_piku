@@ -851,3 +851,137 @@ def cal_spin_resolved_pair_density(
 
             return state
         return grids[:-1] + dr / 2, (init_state, srpd_estimator)
+
+
+# Packing of axis 1 of the (2, ANISO_N_COMPONENTS, nbins) accumulator returned
+# by cal_anisotropic_hyperfine. Axis 0 is spin (up, down); these raw running
+# sums are exactly the inputs from which the dipolar D-tensor is built offline
+# (ferminet_af/ferminet/anisotropic_hyperfine.py::finalise_anisotropic_hyperfine
+# and musr/analysis/). They are additive over samples, so accumulating them
+# batch-by-batch is equivalent to one pass over everything.
+#   rows 0:5    Re(rho_m),  m = -2..2
+#   rows 5:10   Im(rho_m)
+#   rows 10:15  running sum of Re(Y_m)^2   (Monte Carlo error term)
+#   rows 15:20  running sum of Im(Y_m)^2
+#   row  20     count
+#   row  21     sum(r)
+#   row  22     sum(r^2)
+ANISO_N_COMPONENTS = 23
+ANISO_M_VALS = (-2, -1, 0, 1, 2)
+
+
+def cal_anisotropic_hyperfine(
+        nspins: Tuple[int, ...],
+        rmax: float,
+        nbins: int,
+        apply_pbc: bool,
+        r_search: int,
+        lattice_vectors: jnp.ndarray,
+        use_fixed_origin: bool = False,
+        origin_coord: jnp.array = None):
+        """Spin-resolved Y_2m radial decomposition of the muon-electron pair
+        density -- the collection half of the anisotropic (dipolar) hyperfine
+        D-tensor. The D-tensor build, Laguerre fit and eigendecomposition are
+        non-linear whole-dataset operations left to offline analysis
+        (ferminet_af); this only accumulates the additive raw sums.
+
+        Mirrors cal_spin_resolved_pair_density (the isotropic sibling): same
+        minimum-image separations and the same use_fixed_origin switch --
+        use_fixed_origin=True is a classical muon fixed at origin_coord (no
+        muon particle in data.positions), use_fixed_origin=False is a quantum
+        muon taken as the last sampled particle, per walker.
+        """
+
+        if apply_pbc == False:
+                raise NotImplementedError("Anisotropic hyperfine only implemented for pbc!")
+
+        grids = jnp.linspace(0, rmax, nbins + 1)
+        dr = grids[1] - grids[0]
+        lat = Lattice(lattice_vectors)
+        n_particles = sum(nspins)
+
+        if use_fixed_origin:  # No muon particle in data.positions
+          n_up_electrons, n_down_electrons = nspins
+        else:
+          n_up_electrons, n_down_electrons, _ = nspins
+
+        init_state = jnp.zeros((2, ANISO_N_COMPONENTS, nbins))
+
+        def y2m_real_imag(theta, phi):
+            """Real and imaginary parts of the five m=-2..2 second-order
+            spherical harmonics, stacked along a leading axis of length 5.
+            Same convention as the offline muSR anisotropic analysis."""
+            sin_t, cos_t = jnp.sin(theta), jnp.cos(theta)
+            cos_p, sin_p = jnp.cos(phi), jnp.sin(phi)
+            cos_2p, sin_2p = jnp.cos(2 * phi), jnp.sin(2 * phi)
+
+            y_n2 = (cos_2p - 1j * sin_2p) * sin_t**2
+            y_n1 = 2 * (cos_p - 1j * sin_p) * sin_t * cos_t
+            y_0 = (1. / jnp.sqrt(3.)) * (3. * cos_t**2 - 1.) + 0j
+            y_p1 = -2 * (cos_p + 1j * sin_p) * sin_t * cos_t
+            y_p2 = (cos_2p + 1j * sin_2p) * sin_t**2
+
+            y = jnp.stack([y_n2, y_n1, y_0, y_p1, y_p2])
+            return jnp.real(y), jnp.imag(y)
+
+        def bin_components(seps):
+            """seps: (M, 3) Cartesian electron-muon separations for one spin
+            species -> (ANISO_N_COMPONENTS, nbins) contribution."""
+            r = jnp.linalg.norm(seps, axis=-1)
+            rho_xy = jnp.linalg.norm(seps[:, :2], axis=-1)
+            # arctan2 (not arctan) is essential: plain arctan(rho_xy/z) /
+            # arctan(y/x) pick the wrong quadrant for z<0 / x<0, sign-flipping
+            # the m=+/-1 harmonics and making the D-tensor spuriously rhombic.
+            theta = jnp.arctan2(rho_xy, seps[:, 2])
+            phi = jnp.arctan2(seps[:, 1], seps[:, 0])
+            idx = jnp.clip(jnp.searchsorted(grids, r) - 1, 0, nbins - 1)
+
+            y_re, y_im = y2m_real_imag(theta, phi)
+
+            def bsum(values):
+                return jnp.zeros(nbins, dtype=values.dtype).at[idx].add(values)
+            vbsum = jax.vmap(bsum)  # over the 5 harmonics
+
+            return jnp.concatenate([
+                vbsum(y_re), vbsum(y_im), vbsum(y_re**2), vbsum(y_im**2),
+                bsum(jnp.ones_like(r))[None],
+                bsum(r)[None],
+                bsum(r**2)[None],
+            ], axis=0)
+
+        def pos_to_sep(x):
+            """(n_particles, 3) -> minimum-image electron-muon separation
+            vectors (n_electrons, 3)."""
+            if use_fixed_origin:
+              rvec = x - origin_coord
+            else:
+              rvec = x[:-1, :] - x[-1, :]
+            dr_min, _ = min_image_distance_triclinic(rvec, lat, r_search)
+            return dr_min
+
+        def anisotropic_estimator(
+                params: networks.ParamTree,
+                data: networks.FermiNetData,
+                state: jnp.ndarray
+        ):
+            del params
+
+            n_devices_local = data.positions.shape[0]
+            pos = data.positions.reshape(n_devices_local, -1, n_particles, 3)
+
+            def per_device(pos_d):
+                """(B, n_particles, 3) -> (2, ANISO_N_COMPONENTS, nbins) raw
+                sums over this device's walkers."""
+                seps = jax.vmap(pos_to_sep, in_axes=0, out_axes=0)(pos_d)
+                up = seps[:, :n_up_electrons, :].reshape(-1, 3)
+                down = seps[:, n_up_electrons:, :].reshape(-1, 3)
+                return jnp.stack([bin_components(up), bin_components(down)], axis=0)
+
+            # Raw sums are additive across devices; sum (do not average) so the
+            # count row stays a true total, as the offline finalise expects.
+            contribution = constants.pmap(per_device)(pos)
+            state = state + jnp.sum(contribution, axis=0)
+
+            return state
+
+        return grids[:-1] + dr / 2, (init_state, anisotropic_estimator)

@@ -390,6 +390,17 @@ def default() -> ml_collections.ConfigDict:
             'use_fixed_origin': False,
             'origin_coord': None
           },
+          'anisotropic_hyperfine':{  # dipolar hyperfine D-tensor (Y2m sums)
+            'calculate': False,
+            'save_freq': 10000,
+            'rmax': 20.,
+            'r_search': 1,
+            'nbins': 501,
+            # use_fixed_origin True -> classical muon fixed at origin_coord;
+            # False -> quantum muon = last sampled particle (per walker)
+            'use_fixed_origin': False,
+            'origin_coord': None
+          },
       },
       'debug': {
           # Check optimizer state, parameters and loss and raise an exception if
