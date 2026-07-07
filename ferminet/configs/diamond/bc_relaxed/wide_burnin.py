@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     # Training config
     cfg.optim.iterations = 900001
-    cfg.log.save_freq = 2000
+    cfg.log.save_freq = 100
     cfg.log.save_tfreq = 235
     # Fresh net: brand-new empty save_path, restore_path == save_path so no
     # off-T bc_relaxed/pp checkpoint can contaminate the run (EXP-004 risk #1).
