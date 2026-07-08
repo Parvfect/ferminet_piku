@@ -976,6 +976,13 @@ def train(cfg: ml_collections.ConfigDict, writer_manager=None):
       # adapts its own width (see mcmc.mh_update / mcmc.update_mcmc_width).
       if cfg.mcmc.muon_move_width is not None:
         width_arr = width_arr.at[-1].set(cfg.mcmc.muon_move_width)
+        # EXP-004: unmissable stdout confirmation that the muon (last species)
+        # got its own wider initial proposal. print (not logging) so it lands in
+        # srun stdout regardless of the absl handler config.
+        print('[EXP-004] muon_move_width applied: last-species init width set '
+              f'to {cfg.mcmc.muon_move_width} '
+              f'(electrons at cfg.mcmc.move_width={cfg.mcmc.move_width})',
+              flush=True)
     mcmc_width = kfac_jax.utils.replicate_all_local_devices(width_arr)
 
   # EXP-004 guardrail: surface the actual initial per-species proposal width at

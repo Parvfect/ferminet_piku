@@ -1,6 +1,7 @@
 # EXP-004: Does a wider muon proposal + longer burn-in un-trap the muon (off-T → BC) without seeding?
 
-- **Date:** 2026-07-06   **Status:** implemented, ready to run (compute-node pre-launch check pending)
+- **Date:** 2026-07-06 (launched 2026-07-07)   **Status:** RUNNING — job `5529283`, 8 nodes, HOME env,
+  fresh net into `pp_wide_burnin_v3`. Step-0 checkpoint verified (see Result).
 - **System:** diamond 2×2 supercell, BC-relaxed cage (`bc_relaxed/pp` geometry),
   16 C + 1 muon, doublet. Identical to `bc_relaxed/pp` in every respect **except the
   muon MCMC proposal width and burn-in length** — the muon init stays the default
@@ -155,10 +156,81 @@ Verified on CPU (`ferminet-piku` env) — see scratchpad `test_per_species_width
   (0.474); track VMC energy vs −90.669 Ha.
 
 ## Result
-_(pending first run)_
+
+### Launch note (2026-07-07): the run must use the HOME (`parvfection`) conda env
+The first launch on the HOME env crashed (fresh-net multi-host KFAC → kfac_jax `NamedSharding`
+assertion). Root cause and fix are in the Claude-memory note `env-kfac-jax-fresh-net-crash`:
+the HOME env's `kfac_jax` was a newer/dev build (both tagged 0.0.8) that dies on fresh-net KFAC;
+swapped it for the OLD env's working build (originals backed up `*.bak_20260707`). **The OLD
+`parvfect` env is NOT a fallback** — it imports a stale/copied `ferminet` and runs a `train.py`
+with no `muon_move_width` block (its run printed no `[EXP-004]`/`Initial MCMC width` line), i.e.
+it would silently run WITHOUT the intervention. Post-fix, the HOME env runs our code and no longer
+crashes (job `5529283`).
+
+### Step-0 checkpoint (`ckpt_000000`, after the 2000-step wide burn-in) — intervention CONFIRMED, muon properly un-trapped
+Pre-launch checks all pass and the intervention is live:
+- **Fresh net:** log shows "No checkpoint found. Training new model." ✓
+- **Initial width:** log prints `[EXP-004] muon_move_width applied ... 0.3` and
+  `Initial MCMC width per species: [0.02 0.02 0.3]`; `ckpt_000000` stores **muon width 0.3,
+  electrons 0.02** (`tools/muon_width_check.py --particles 33,32,1`, 15× ratio). ✓
+- **Muon walkers are a broad diffuse cloud, NOT pinned to any site** (4096 walkers, muon = last
+  of 66 particles):
+  - RMS radius about its mean ≈ **12.7 bohr** = **2× the electrons'** (~6.5 bohr, the normal
+    delocalized valence gas); per-axis span ≈ 55–58 bohr (~8 lattice constants, across PBC images).
+  - Distance to BC ranges **0.4 → 40 bohr** (median 11.5); only ~5% of walkers within 3.2 bohr of BC
+    — i.e. spread everywhere, clustered nowhere.
+  - Matches free diffusion under the wide proposal: `0.3·√(2·2000·pmove)` ≈ 14.7 bohr predicted vs
+    12.7 observed. So the wide burn-in did exactly its job — it equilibrated the muon to a broad,
+    BC-reaching ensemble instead of the ~0.15 bohr off-T blob the default width produces.
+
+**Conclusion (step 0):** the intervention starts from a correctly un-trapped, diffuse muon — the
+necessary precondition for H1. This is NOT yet an H1/H0 verdict: it only confirms the *initial*
+state is diffuse. The decisive test is whether, as the width adapts back down over the first several
+thousand optimiser steps, the muon **re-localizes at BC** (cubic-frac 0.125) rather than falling
+back to off-T (0.474). Watch the walker spread contract at ckpt 100 / 2000 / 5000, then confirm the
+site with a mid-training `muon_site_analysis.py` inference and track VMC energy vs −90.669 Ha.
+_(site/energy verdict pending training)_
+
+### Step-10200 trajectory + site (2026-07-07) — **H1 FALSIFIED**, muon re-collapsed away from BC
+Full width / spread / site read on the live run (`tools/muon_width_check.py`,
+`tools/muon_diffusion_check.py`, and a checkpoint-snapshot `muon_site_analysis` on
+`qmcjax_ckpt_010200`; the ensemble is collapsed so the 4096-walker snapshot pins the site):
+
+- **Proposal width collapsed early.** Muon width 0.30 (step 0) → 0.14 (800) → **0.072 (1800,
+  ratio 0.82× the electrons)** → slow re-growth to 0.116 (10 200, 1.4×). The 0.3 init gave
+  sub-50% muon acceptance, so the adapter divided by 1.1 at nearly every one of the first
+  ~15 events, unwinding the wide init in ~1500 steps — the ×/÷1.1-every-100-steps cadence is
+  the culprit. During the selection window (steps ~1600–3400) the muon proposal was *narrower
+  than the electrons'*.
+- **Ensemble diffuse only at init.** Circular-std spread 2.6–3.1 bohr (steps 0–400) →
+  collapses through 1.2 bohr (500) to **~0.15 bohr by step ~700**, flat thereafter. BC
+  occupancy (%walkers <1.5 b of BC) drains 5.5% → 0% by step 300 and stays 0%. Same
+  diffuse-only-at-init signature as the default-width `bc_relaxed/pp` run.
+- **Site = a tetrahedral interstitial, NOT BC.** Circular-mean cubic-frac ≈ (0.94, 0.55, 0.99),
+  hist-peak (0.95, 0.55, 0.95); 4 roughly-equidistant carbons at ~2.6–3.0 bohr (classifier: T
+  site). **3.2–3.3 bohr from BC, 0% of walkers within 2 bohr of BC.** It is also 4.6 bohr from
+  the `bc_relaxed/pp` off-T (0.474)³ pocket — it settled in a T-cage, a *different* interstitial
+  basin, not BC and not the original off-T. Tight single blob: RMS radius 0.38 bohr, per-axis
+  (0.17, 0.16, 0.30).
+- **Energy** (`train_stats.csv`): pmove settles ~0.52; `ewmean` descends monotonically
+  −79.6 (2k) → −88.2 (6k) → **−89.41 ± 0.12 (block-avg step ≥8000)**, still above the off-T
+  reference −90.669 Ha and still dropping (run only at 10.2k steps).
 
 ## Verdict
-_(pending)_
+**H0 (accept) / H1 (reject).** A one-shot wide muon *init* does not un-trap the muon to BC. The
+intervention fired correctly (diffuse 2.6-bohr cloud at step 0), but the adaptive proposal width
+collapsed it back within ~1500 steps — faster than the basin-selection window — and the muon
+committed to a single T-type interstitial basin by step ~700, never visiting BC (0% occupancy
+throughout). This is the predicted-more-likely outcome: **proposal width is not, by itself, the
+lever** — keeping the walkers mobile for a while does not install a BC-preferring force on ψ,
+consistent with BC's depth being a muon–electron (muonium) correlation the fresh net has not
+learned. Caveats: energy still descending and the site read is a single-checkpoint snapshot (not
+an accumulated inference density), but with a collapsed 0.38-bohr ensemble and 0% BC occupancy a
+late basin hop to BC is very unlikely.
+
+**Follow-up → EXP-005** (blunt the width adapter so the muon stays wide through the *whole*
+selection window, not just at init) and, if that also fails, an **envelope-level muon bias** or
+explicit seeding (EXP-002) as the remaining levers.
 
 ## Next / current steps
 - Compute-node pre-launch check (fresh-net line + initial muon width 0.3), then launch.
