@@ -1,0 +1,421 @@
+<title>Muon-site ground-state energies</title>
+<style>
+
+:root{
+  --plane:#eef1f5; --surface:#f7f9fc; --ink:#0e1116; --ink2:#4a515c; --muted:#7b828d;
+  --grid:#e2e6ec; --base:#c7cdd6; --border:rgba(14,17,22,.10);
+  --c-seeded:#2a78d6; --c-unseeded:#eb6834; --c-classical:#4a3aa7;
+  --chipbg:#e9edf3; --chipink:#4a515c; --findbg:#eaf1fb; --findbd:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --plane:#0c0e11; --surface:#15181d; --ink:#f4f6f9; --ink2:#c3c8d0; --muted:#8b929c;
+    --grid:#262a31; --base:#3a3f48; --border:rgba(255,255,255,.10);
+    --c-seeded:#3987e5; --c-unseeded:#d95926; --c-classical:#9085e9;
+    --chipbg:#20242b; --chipink:#c3c8d0; --findbg:#16202e; --findbd:#3987e5;
+  }
+}
+:root[data-theme="light"]{
+  --plane:#eef1f5; --surface:#f7f9fc; --ink:#0e1116; --ink2:#4a515c; --muted:#7b828d;
+  --grid:#e2e6ec; --base:#c7cdd6; --border:rgba(14,17,22,.10);
+  --c-seeded:#2a78d6; --c-unseeded:#eb6834; --c-classical:#4a3aa7;
+  --chipbg:#e9edf3; --chipink:#4a515c; --findbg:#eaf1fb; --findbd:#2a78d6;
+}
+:root[data-theme="dark"]{
+  --plane:#0c0e11; --surface:#15181d; --ink:#f4f6f9; --ink2:#c3c8d0; --muted:#8b929c;
+  --grid:#262a31; --base:#3a3f48; --border:rgba(255,255,255,.10);
+  --c-seeded:#3987e5; --c-unseeded:#d95926; --c-classical:#9085e9;
+  --chipbg:#20242b; --chipink:#c3c8d0; --findbg:#16202e; --findbd:#3987e5;
+}
+*{box-sizing:border-box}
+body{margin:0}
+.wrap{
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  background:var(--plane); color:var(--ink); font-family:var(--sans);
+  padding:clamp(20px,4vw,52px); line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+code{font-family:var(--mono); font-size:.9em; background:var(--chipbg); padding:.05em .35em; border-radius:4px}
+.masthead{max-width:70ch; margin:0 auto 30px}
+.eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600}
+h1{font-size:clamp(24px,3.4vw,36px); line-height:1.12; margin:.35em 0 .3em; letter-spacing:-.02em; text-wrap:balance; font-weight:680}
+.lede{color:var(--ink2); font-size:16px; margin:0 0 16px}
+.finding{background:var(--findbg); border-left:3px solid var(--findbd); border-radius:0 8px 8px 0;
+  padding:12px 16px; font-size:14.5px; color:var(--ink)}
+.finding b{font-weight:660}
+.star{color:var(--c-unseeded); font-weight:700}
+.legend{display:flex; flex-wrap:wrap; gap:8px 20px; max-width:1080px; margin:0 auto 26px;
+  padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:10px; font-size:13px; color:var(--ink2)}
+.lg{display:flex; align-items:center; gap:8px}
+.lg.sep{margin-left:auto}
+.sw{width:14px; height:14px; border-radius:50%; background:var(--c); flex:0 0 auto}
+.sw.solid{background:var(--ink2)}
+.sw.ring{background:var(--surface); border:2px solid var(--ink2)}
+
+.panel{max-width:1080px; margin:0 auto 20px; background:var(--surface);
+  border:1px solid var(--border); border-radius:14px; padding:20px clamp(14px,2.4vw,26px) 8px}
+.phead{margin-bottom:12px}
+.phead h2{margin:0; font-size:19px; letter-spacing:-.01em}
+.psub{margin:2px 0 0; color:var(--muted); font-size:12.5px; font-family:var(--mono)}
+.plot{position:relative}
+.overlay{position:absolute; top:0; bottom:34px; left:calc(var(--lw) + var(--gap)); right:calc(var(--vw) + var(--gap)); pointer-events:none; z-index:0}
+.gline{position:absolute; top:0; bottom:0; width:1px; background:var(--grid); transform:translateX(-.5px)}
+.rows{position:relative; z-index:1}
+:root{--lw:216px; --vw:150px; --gap:14px}
+.row{display:grid; grid-template-columns:var(--lw) 1fr var(--vw); column-gap:var(--gap); align-items:center; min-height:38px}
+.rlabel{display:flex; align-items:baseline; gap:8px; overflow:hidden}
+.rid{font-family:var(--mono); font-weight:700; font-size:13px; color:var(--ink); flex:0 0 auto}
+.rcfg{font-size:13px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.chip{margin-left:auto; flex:0 0 auto; font-size:11px; font-family:var(--mono); background:var(--chipbg); color:var(--chipink);
+  padding:1px 7px; border-radius:20px; letter-spacing:.01em}
+.track{position:relative; height:38px}
+.ebar{position:absolute; top:50%; height:2px; transform:translateY(-50%); background:var(--base); border-radius:2px; min-width:1px}
+.dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; transform:translate(-50%,-50%);
+  background:var(--c); box-shadow:0 0 0 2px var(--surface); z-index:2}
+.dot.hollow{background:var(--surface); border:2.5px solid var(--c); box-shadow:none}
+.rval{display:flex; align-items:baseline; gap:7px; justify-content:flex-end; font-family:var(--mono); font-variant-numeric:tabular-nums}
+.rval .e{font-size:13.5px; font-weight:640; color:var(--ink)}
+.rval .steps{font-size:11.5px; color:var(--muted); min-width:34px; text-align:right}
+.axisrow{margin-top:2px}
+.axis{position:relative; height:20px; margin-left:calc(var(--lw) + var(--gap)); margin-right:calc(var(--vw) + var(--gap))}
+.tick{position:absolute; transform:translateX(-50%); font-family:var(--mono); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; top:2px}
+.axislbl{text-align:center; margin-left:calc(var(--lw) + var(--gap)); margin-right:calc(var(--vw) + var(--gap));
+  font-size:11px; color:var(--muted); letter-spacing:.02em; padding:2px 0 8px}
+
+.tablewrap{max-width:1080px; margin:26px auto 8px}
+.tabh{font-size:16px; margin:0 0 10px}
+.tscroll{overflow-x:auto; border:1px solid var(--border); border-radius:12px}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:640px; background:var(--surface)}
+th,td{text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); white-space:nowrap}
+thead th{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:650; background:var(--chipbg)}
+td.num,th.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
+td.mono{font-family:var(--mono)}
+tr.conv td:first-child{box-shadow:inset 3px 0 0 var(--c-seeded)}
+tbody tr:last-child td{border-bottom:none}
+.tdot{display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--c); margin-right:7px; vertical-align:middle}
+
+.notes{max-width:70ch; margin:28px auto 0; font-size:13.5px; color:var(--ink2)}
+.notes h3{color:var(--ink); font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin:0 0 8px}
+.notes ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px}
+.notes b{color:var(--ink); font-weight:640}
+@media (max-width:640px){
+  :root{--lw:120px; --vw:120px; --gap:10px}
+  .rcfg{display:none}
+}
+
+</style>
+<div class="wrap">
+<header class="masthead">
+  <div class="eyebrow">VMC / FermiNet &middot; muon-site study &middot; refreshed 2026-07-08</div>
+  <h1>Ground-state energy across all muon-site runs</h1>
+  <p class="lede">Block-averaged plateau energies (&plusmn;1&nbsp;SEM) from each run&rsquo;s <code>train_stats.csv</code>.
+  Colour marks the muon treatment; a filled dot is a converged run, a hollow dot with a
+  <span class="star">&#9733;</span> is one that has <em>not</em> converged. Iteration count sits at the right of every row.</p>
+  <div class="finding">
+    <strong>Read:</strong> among <em>quantum</em> runs, seeding reaches the lowest energy in both systems &mdash;
+    diamond <b>#14 bc_seeded</b> (converged, &minus;90.696&nbsp;E<sub>h</sub>) sits <b>26.9&nbsp;mHa below</b> the unseeded off-T <b>#8</b>,
+    and silicon <b>#17 t_seeded</b> / <b>#15 bc_seeded</b> sit ~17&nbsp;mHa below the unseeded runs.
+    Classical rows (fixed muon) carry <b>no zero-point energy</b> and sit artificially low &mdash; a reference, not a comparison.
+  </div>
+</header>
+
+<div class="legend">
+  <div class="lg"><span class="sw" style="--c:var(--c-seeded)"></span>Quantum &middot; seeded</div>
+  <div class="lg"><span class="sw" style="--c:var(--c-unseeded)"></span>Quantum &middot; unseeded</div>
+  <div class="lg"><span class="sw" style="--c:var(--c-classical)"></span>Classical (fixed &mu; &mdash; no ZPE)</div>
+  <div class="lg sep"><span class="sw solid"></span>converged</div>
+  <div class="lg"><span class="sw ring"></span><span class="star">&#9733;</span>&nbsp;not converged</div>
+</div>
+
+<section class="panel">
+  <div class="phead">
+    <h2>Diamond</h2>
+    <p class="psub">2×2 supercell · 16 C + μ · doublet · pseudopotential · a = 6.74 bohr</p>
+  </div>
+  <div class="plot">
+    <div class="overlay"><div class="gline" style="left:2.381%"></div><div class="gline" style="left:21.429%"></div><div class="gline" style="left:40.476%"></div><div class="gline" style="left:59.524%"></div><div class="gline" style="left:78.571%"></div><div class="gline" style="left:97.619%"></div></div>
+    <div class="rows">
+      <div class="row">
+  <div class="rlabel">
+    <span class="rid">#4</span>
+    <span class="rcfg">classical bc</span>
+    <span class="chip">fixed BC</span>
+  </div>
+  <div class="track" title="#4 classical bc · fixed BC · Classical (fixed μ) · -90.73010 ± 0.00029 E_h · 338k steps · converged">
+    <div class="ebar" style="left:6.957%;width:0.276%"></div>
+    <div class="dot" style="left:7.095%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.73010</span>
+    <span class="steps">338k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#7</span>
+    <span class="rcfg">classical T_site</span>
+    <span class="chip">fixed T</span>
+  </div>
+  <div class="track" title="#7 classical T_site · fixed T · Classical (fixed μ) · -90.69624 ± 0.00015 E_h · 472k steps · converged">
+    <div class="ebar" style="left:23.148%;width:0.143%"></div>
+    <div class="dot" style="left:23.219%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.69624</span>
+    <span class="steps">472k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#14</span>
+    <span class="rcfg">bc_seeded</span>
+    <span class="chip">BC</span>
+  </div>
+  <div class="track" title="#14 bc_seeded · BC · Quantum · seeded · -90.69597 ± 0.00019 E_h · 580k steps · converged">
+    <div class="ebar" style="left:23.257%;width:0.181%"></div>
+    <div class="dot" style="left:23.348%;--c:var(--c-seeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.69597</span>
+    <span class="steps">580k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#13</span>
+    <span class="rcfg">classical t_relaxed</span>
+    <span class="chip">fixed T*</span>
+  </div>
+  <div class="track" title="#13 classical t_relaxed · fixed T* · Classical (fixed μ) · -90.69222 ± 0.00027 E_h · 428k steps · descending">
+    <div class="ebar" style="left:25.005%;width:0.257%"></div>
+    <div class="dot hollow" style="left:25.133%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.69222</span><span class="star" title="not converged">★</span>
+    <span class="steps">428k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#8</span>
+    <span class="rcfg">pp_relax_2</span>
+    <span class="chip">off-T</span>
+  </div>
+  <div class="track" title="#8 pp_relax_2 · off-T · Quantum · unseeded · -90.66904 ± 0.00029 E_h · 280.2k steps · frozen (final)">
+    <div class="ebar" style="left:36.033%;width:0.276%"></div>
+    <div class="dot hollow" style="left:36.171%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.66904</span><span class="star" title="not converged">★</span>
+    <span class="steps">280.2k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#6</span>
+    <span class="rcfg">unrelaxed pp</span>
+    <span class="chip">T</span>
+  </div>
+  <div class="track" title="#6 unrelaxed pp · T · Quantum · unseeded · -90.66312 ± 0.00017 E_h · 522k steps · converged">
+    <div class="ebar" style="left:38.910%;width:0.162%"></div>
+    <div class="dot" style="left:38.990%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.66312</span>
+    <span class="steps">522k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#12</span>
+    <span class="rcfg">t_relaxed</span>
+    <span class="chip">T</span>
+  </div>
+  <div class="track" title="#12 t_relaxed · T · Quantum · unseeded · -90.65979 ± 0.00023 E_h · 478k steps · noise-limited">
+    <div class="ebar" style="left:40.467%;width:0.219%"></div>
+    <div class="dot hollow" style="left:40.576%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.65979</span><span class="star" title="not converged">★</span>
+    <span class="steps">478k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#5</span>
+    <span class="rcfg">bc (original)</span>
+    <span class="chip">off-T</span>
+  </div>
+  <div class="track" title="#5 bc (original) · off-T · Quantum · unseeded · -90.59794 ± 0.00151 E_h · 336k steps · noise-limited">
+    <div class="ebar" style="left:69.310%;width:1.438%"></div>
+    <div class="dot hollow" style="left:70.029%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.59794</span><span class="star" title="not converged">★</span>
+    <span class="steps">336k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#18</span>
+    <span class="rcfg">t_seeded</span>
+    <span class="chip">T</span>
+  </div>
+  <div class="track" title="#18 t_seeded · T · Quantum · seeded · -90.54469 ± 0.00208 E_h · 120k steps · warm-up">
+    <div class="ebar" style="left:94.395%;width:1.981%"></div>
+    <div class="dot hollow" style="left:95.386%;--c:var(--c-seeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-90.54469</span><span class="star" title="not converged">★</span>
+    <span class="steps">120k</span>
+  </div>
+</div>
+    </div>
+    <div class="axisrow"><div class="axis"><span class="tick" style="left:2.381%">-90.74</span><span class="tick" style="left:21.429%">-90.70</span><span class="tick" style="left:40.476%">-90.66</span><span class="tick" style="left:59.524%">-90.62</span><span class="tick" style="left:78.571%">-90.58</span><span class="tick" style="left:97.619%">-90.54</span></div><div class="axislbl">ground-state energy&#8195;E&#8320;&#8202;(hartree)&#8195;&#8592; lower = better</div></div>
+  </div>
+</section>
+<section class="panel">
+  <div class="phead">
+    <h2>Silicon</h2>
+    <p class="psub">2×2×2 supercell · 16 Si + μ · doublet · pseudopotential · a = 10.26 bohr</p>
+  </div>
+  <div class="plot">
+    <div class="overlay"><div class="gline" style="left:10.959%"></div><div class="gline" style="left:38.356%"></div><div class="gline" style="left:65.753%"></div><div class="gline" style="left:93.151%"></div></div>
+    <div class="rows">
+      <div class="row">
+  <div class="rlabel">
+    <span class="rid">#11</span>
+    <span class="rcfg">classical t_relaxed</span>
+    <span class="chip">fixed T*</span>
+  </div>
+  <div class="track" title="#11 classical t_relaxed · fixed T* · Classical (fixed μ) · -62.92218 ± 0.00020 E_h · 306.6k steps · diverged @306k">
+    <div class="ebar" style="left:7.699%;width:0.548%"></div>
+    <div class="dot hollow" style="left:7.973%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.92218</span><span class="star" title="not converged">★</span>
+    <span class="steps">306.6k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#2</span>
+    <span class="rcfg">classical (T)</span>
+    <span class="chip">fixed T</span>
+  </div>
+  <div class="track" title="#2 classical (T) · fixed T · Classical (fixed μ) · -62.91337 ± 0.00015 E_h · 223.7k steps · frozen (final)">
+    <div class="ebar" style="left:19.836%;width:0.411%"></div>
+    <div class="dot hollow" style="left:20.041%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.91337</span><span class="star" title="not converged">★</span>
+    <span class="steps">223.7k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#15</span>
+    <span class="rcfg">bc_seeded</span>
+    <span class="chip">BC</span>
+  </div>
+  <div class="track" title="#15 bc_seeded · BC · Quantum · seeded · -62.89170 ± 0.00022 E_h · 196k steps · descending">
+    <div class="ebar" style="left:49.425%;width:0.603%"></div>
+    <div class="dot hollow" style="left:49.726%;--c:var(--c-seeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.89170</span><span class="star" title="not converged">★</span>
+    <span class="steps">196k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#17</span>
+    <span class="rcfg">t_seeded</span>
+    <span class="chip">T (relaxed)</span>
+  </div>
+  <div class="track" title="#17 t_seeded · T (relaxed) · Quantum · seeded · -62.89124 ± 0.00051 E_h · 224k steps · noise-limited">
+    <div class="ebar" style="left:49.658%;width:1.397%"></div>
+    <div class="dot hollow" style="left:50.356%;--c:var(--c-seeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.89124</span><span class="star" title="not converged">★</span>
+    <span class="steps">224k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#10</span>
+    <span class="rcfg">t_relaxed</span>
+    <span class="chip">T (fled)</span>
+  </div>
+  <div class="track" title="#10 t_relaxed · T (fled) · Quantum · unseeded · -62.87392 ± 0.00034 E_h · 138k steps · frozen (final)">
+    <div class="ebar" style="left:73.616%;width:0.932%"></div>
+    <div class="dot hollow" style="left:74.082%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.87392</span><span class="star" title="not converged">★</span>
+    <span class="steps">138k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#16</span>
+    <span class="rcfg">classical bc_relaxed</span>
+    <span class="chip">fixed BC</span>
+  </div>
+  <div class="track" title="#16 classical bc_relaxed · fixed BC · Classical (fixed μ) · -62.86852 ± 0.00229 E_h · 61.4k steps · warm-up">
+    <div class="ebar" style="left:78.342%;width:6.274%"></div>
+    <div class="dot hollow" style="left:81.479%;--c:var(--c-classical)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.86852</span><span class="star" title="not converged">★</span>
+    <span class="steps">61.4k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#1</span>
+    <span class="rcfg">unrelaxed</span>
+    <span class="chip">T</span>
+  </div>
+  <div class="track" title="#1 unrelaxed · T · Quantum · unseeded · -62.86151 ± 0.00047 E_h · 180k steps · frozen (final)">
+    <div class="ebar" style="left:90.438%;width:1.288%"></div>
+    <div class="dot hollow" style="left:91.082%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.86151</span><span class="star" title="not converged">★</span>
+    <span class="steps">180k</span>
+  </div>
+</div><div class="row">
+  <div class="rlabel">
+    <span class="rid">#9</span>
+    <span class="rcfg">bc_relaxed</span>
+    <span class="chip">T (fled)</span>
+  </div>
+  <div class="track" title="#9 bc_relaxed · T (fled) · Quantum · unseeded · -62.86146 ± 0.00076 E_h · 138k steps · frozen (final)">
+    <div class="ebar" style="left:90.110%;width:2.082%"></div>
+    <div class="dot hollow" style="left:91.151%;--c:var(--c-unseeded)"></div>
+  </div>
+  <div class="rval">
+    <span class="e">-62.86146</span><span class="star" title="not converged">★</span>
+    <span class="steps">138k</span>
+  </div>
+</div>
+    </div>
+    <div class="axisrow"><div class="axis"><span class="tick" style="left:10.959%">-62.92</span><span class="tick" style="left:38.356%">-62.90</span><span class="tick" style="left:65.753%">-62.88</span><span class="tick" style="left:93.151%">-62.86</span></div><div class="axislbl">ground-state energy&#8195;E&#8320;&#8202;(hartree)&#8195;&#8592; lower = better</div></div>
+  </div>
+</section>
+
+<section class="tablewrap">
+  <h2 class="tabh">All runs &mdash; full data</h2>
+  <div class="tscroll">
+  <table>
+    <thead><tr>
+      <th>Run</th><th>System</th><th>Config</th><th>Muon</th><th>Site</th>
+      <th class="num">E (E<sub>h</sub>)</th><th class="num">&plusmn;SEM</th><th class="num">Steps</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+    <tr class="conv"><td class="mono">#4</td><td>Diamond</td><td class="mono">classical bc</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed BC</td><td class="num">-90.73010</td><td class="num">0.00029</td><td class="num">338k</td><td>converged</td></tr><tr class="conv"><td class="mono">#7</td><td>Diamond</td><td class="mono">classical T_site</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed T</td><td class="num">-90.69624</td><td class="num">0.00015</td><td class="num">472k</td><td>converged</td></tr><tr class="conv"><td class="mono">#14</td><td>Diamond</td><td class="mono">bc_seeded</td><td><span class="tdot" style="--c:var(--c-seeded)"></span>seeded</td><td>BC</td><td class="num">-90.69597</td><td class="num">0.00019</td><td class="num">580k</td><td>converged</td></tr><tr class="unconv"><td class="mono">#13</td><td>Diamond</td><td class="mono">classical t_relaxed</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed T*</td><td class="num">-90.69222</td><td class="num">0.00027</td><td class="num">428k</td><td>&#9733; descending</td></tr><tr class="unconv"><td class="mono">#8</td><td>Diamond</td><td class="mono">pp_relax_2</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>off-T</td><td class="num">-90.66904</td><td class="num">0.00029</td><td class="num">280.2k</td><td>&#9733; frozen (final)</td></tr><tr class="conv"><td class="mono">#6</td><td>Diamond</td><td class="mono">unrelaxed pp</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>T</td><td class="num">-90.66312</td><td class="num">0.00017</td><td class="num">522k</td><td>converged</td></tr><tr class="unconv"><td class="mono">#12</td><td>Diamond</td><td class="mono">t_relaxed</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>T</td><td class="num">-90.65979</td><td class="num">0.00023</td><td class="num">478k</td><td>&#9733; noise-limited</td></tr><tr class="unconv"><td class="mono">#5</td><td>Diamond</td><td class="mono">bc (original)</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>off-T</td><td class="num">-90.59794</td><td class="num">0.00151</td><td class="num">336k</td><td>&#9733; noise-limited</td></tr><tr class="unconv"><td class="mono">#18</td><td>Diamond</td><td class="mono">t_seeded</td><td><span class="tdot" style="--c:var(--c-seeded)"></span>seeded</td><td>T</td><td class="num">-90.54469</td><td class="num">0.00208</td><td class="num">120k</td><td>&#9733; warm-up</td></tr><tr class="unconv"><td class="mono">#11</td><td>Silicon</td><td class="mono">classical t_relaxed</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed T*</td><td class="num">-62.92218</td><td class="num">0.00020</td><td class="num">306.6k</td><td>&#9733; diverged @306k</td></tr><tr class="unconv"><td class="mono">#2</td><td>Silicon</td><td class="mono">classical (T)</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed T</td><td class="num">-62.91337</td><td class="num">0.00015</td><td class="num">223.7k</td><td>&#9733; frozen (final)</td></tr><tr class="unconv"><td class="mono">#15</td><td>Silicon</td><td class="mono">bc_seeded</td><td><span class="tdot" style="--c:var(--c-seeded)"></span>seeded</td><td>BC</td><td class="num">-62.89170</td><td class="num">0.00022</td><td class="num">196k</td><td>&#9733; descending</td></tr><tr class="unconv"><td class="mono">#17</td><td>Silicon</td><td class="mono">t_seeded</td><td><span class="tdot" style="--c:var(--c-seeded)"></span>seeded</td><td>T (relaxed)</td><td class="num">-62.89124</td><td class="num">0.00051</td><td class="num">224k</td><td>&#9733; noise-limited</td></tr><tr class="unconv"><td class="mono">#10</td><td>Silicon</td><td class="mono">t_relaxed</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>T (fled)</td><td class="num">-62.87392</td><td class="num">0.00034</td><td class="num">138k</td><td>&#9733; frozen (final)</td></tr><tr class="unconv"><td class="mono">#16</td><td>Silicon</td><td class="mono">classical bc_relaxed</td><td><span class="tdot" style="--c:var(--c-classical)"></span>Classical (fixed μ)</td><td>fixed BC</td><td class="num">-62.86852</td><td class="num">0.00229</td><td class="num">61.4k</td><td>&#9733; warm-up</td></tr><tr class="unconv"><td class="mono">#1</td><td>Silicon</td><td class="mono">unrelaxed</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>T</td><td class="num">-62.86151</td><td class="num">0.00047</td><td class="num">180k</td><td>&#9733; frozen (final)</td></tr><tr class="unconv"><td class="mono">#9</td><td>Silicon</td><td class="mono">bc_relaxed</td><td><span class="tdot" style="--c:var(--c-unseeded)"></span>unseeded</td><td>T (fled)</td><td class="num">-62.86146</td><td class="num">0.00076</td><td class="num">138k</td><td>&#9733; frozen (final)</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<footer class="notes">
+  <h3>Notes &amp; caveats</h3>
+  <ul>
+    <li><b>Classical &ne; quantum.</b> Classical runs clamp the muon as a point charge, so they omit muon zero-point energy and sit lower by construction &mdash; not a better ground state, a different quantity. They are shown only as fixed-site references.</li>
+    <li><b>Diamond and silicon are separate scales</b> (~&minus;90 vs ~&minus;62&nbsp;E<sub>h</sub>) and are never compared across panels.</li>
+    <li><b>&#9733; = not converged</b> by the block-drift test (<code>tools/energy_convergence.py</code>, tol&nbsp;1&nbsp;mHa). &ldquo;noise-limited&rdquo; = slope statistically flat but drift just over tol (effectively plateaued); &ldquo;frozen&rdquo; = training stopped; &ldquo;descending / warm-up&rdquo; = still actively falling.</li>
+    <li><b>Only 4 runs are strictly converged:</b> diamond #4, #7, #6, #14. All silicon runs are still descending or noise-limited; treat their energies as upper bounds.</li>
+    <li><b>Silicon #11</b> classical t_relaxed diverged at step&nbsp;306.6k; the value shown is its last clean block. <b>Diamond #3</b> (all-electron, no pseudopotential, &minus;609&nbsp;E<sub>h</sub>) is a different Hamiltonian entirely and is omitted.</li>
+  </ul>
+</footer>
+</div>
