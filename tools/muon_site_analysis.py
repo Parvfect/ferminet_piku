@@ -20,6 +20,7 @@ Edit the CASES dict to add more runs. Geometry must match the inference config.
 import sys
 import glob
 import os
+import re
 import numpy as np
 
 # Lattice constant + fcc-primitive lattice vectors are set per-case via
@@ -198,6 +199,33 @@ CASES = {
         lattice_a=10.26,
         bc_pair=(0, 8),
     ),
+    # Silicon T-SEEDED quantum muon (EXP-003b): same DFT-relaxed geometry as
+    # silicon_t_relaxed, but the muon MCMC walkers were seeded at the relaxed
+    # T-site so the muon HOLDS the cage (the unseeded #10 fled it). This run's
+    # paired inference never dumped positions_*.npy, so we read the walker
+    # positions straight from the training checkpoints (data/positions; each
+    # holds batch_size=4096 full 66-particle configs). 'checkpoints' pools the
+    # last n_ckpt npz files. Same muonium check as the other quantum cases.
+    "silicon_t_seeded": dict(
+        checkpoints="/projects/u6em/parv/silicon_unpaired/t_seeded",
+        n_ckpt=20,
+        carbons=SI_T_RELAXED,
+        lattice_a=10.26,
+        bc_pair=(0, 8),
+    ),
+    # Silicon CLASSICAL T-relaxed muon: the muon is a FIXED H nucleus at the
+    # DFT-relaxed tetrahedral site (~0.75*a); 65 electrons (33,32), no muon
+    # particle. SRPD uses fixed_origin = that H position. (Training later
+    # diverged past ~330k, but the 2026-07-01 inference frames predate the
+    # blowup and are finite.)
+    "silicon_classical_t_relaxed": dict(
+        positions="/projects/u6em/parv/silicon_unpaired/classical/t_relaxed/inference/positions",
+        carbons=SI_T_RELAXED,
+        lattice_a=10.26,
+        bc_pair=(0, 8),
+        n_particles=65,                       # electrons only, no muon particle
+        fixed_origin=np.array([0.74999906, 0.74999903, 0.74999906]) * 10.26,
+    ),
     # Diamond T-relaxed quantum muon (diamond analogue of EXP-003): DFT-relaxed
     # geometry, T-cage EXPANDED +0.4%. KEY question — does the quantum muon localise
     # in the relaxed (expanded) cage WITHOUT seeding (it should, unlike silicon's
@@ -239,17 +267,48 @@ def min_image(d):
     return f @ L
 
 
-def load_muons(positions_dir, n_particles=N_PARTICLES, muon_idx=None):
+def _ckpt_step(path):
+    return int(re.search(r"ckpt_(\d+)", os.path.basename(path)).group(1))
+
+
+def iter_frames(cfg):
+    """Yield (W, n_particles, 3) walker-position frames for a case.
+
+    Prefers inference dumps (positions_*.npy). If the case has none but supplies
+    a 'checkpoints' dir, reads the live MCMC walkers from the last n_ckpt
+    training checkpoints instead (data/positions, batch_size configs each). This
+    lets bound-state analysis run off checkpoints when no inference was dumped.
+    """
+    n_particles = cfg.get("n_particles", N_PARTICLES)
+    pos_dir = cfg.get("positions")
+    files = (sorted(glob.glob(os.path.join(pos_dir, "positions_*.npy")))
+             if pos_dir else [])
+    if files:
+        for fp in files:
+            yield np.load(fp).reshape(-1, n_particles, 3)
+        return
+    ckdir = cfg.get("checkpoints")
+    if not ckdir:
+        raise FileNotFoundError(
+            f"no positions_*.npy in {pos_dir} and no 'checkpoints' dir for case")
+    ckfiles = sorted(glob.glob(os.path.join(ckdir, "qmcjax_ckpt_*.npz")),
+                     key=_ckpt_step)
+    if not ckfiles:
+        raise FileNotFoundError(f"no qmcjax_ckpt_*.npz in {ckdir}")
+    for fp in ckfiles[-cfg.get("n_ckpt", 20):]:
+        data = np.load(fp, allow_pickle=True)["data"].tolist()
+        yield data["positions"].reshape(-1, n_particles, 3)
+
+
+def load_muons(cfg, muon_idx=None):
+    n_particles = cfg.get("n_particles", N_PARTICLES)
     if muon_idx is None:
         muon_idx = n_particles - 1
-    files = sorted(glob.glob(os.path.join(positions_dir, "positions_*.npy")))
-    if not files:
-        raise FileNotFoundError(f"no positions_*.npy in {positions_dir}")
-    chunks = []
-    for fp in files:
-        arr = np.load(fp).reshape(-1, n_particles, 3)  # (samples, n_particles, 3)
+    chunks, nframes = [], 0
+    for arr in iter_frames(cfg):
         chunks.append(arr[:, muon_idx, :])
-    return np.concatenate(chunks, axis=0), len(files)
+        nframes += 1
+    return np.concatenate(chunks, axis=0), nframes
 
 
 def site_report(name, p, carbons, bc_site, bond=None):
@@ -300,7 +359,7 @@ def muon_spread(case_name):
     overall RMS radius sqrt(<|r-r0|^2>)."""
     cfg = CASES[case_name]
     set_lattice(cfg["lattice_a"])
-    muons, nfiles = load_muons(cfg["positions"], cfg.get("n_particles", N_PARTICLES))
+    muons, nfiles = load_muons(cfg)
 
     # Centre = 3D-histogram peak in fcc-fractional space (robust to wrap-around).
     frac = (muons @ LINV) % 1.0
@@ -358,9 +417,9 @@ def muon_srpd(case_name, rmax=None, nbins=None, r_search=0):
     up_hist = np.zeros(nbins)
     dn_hist = np.zeros(nbins)
     nsamples = 0
-    files = sorted(glob.glob(os.path.join(cfg["positions"], "positions_*.npy")))
-    for fp in files:
-        arr = np.load(fp).reshape(-1, np_total, 3)         # (W, np_total, 3)
+    nframes = 0
+    for arr in iter_frames(cfg):                           # (W, np_total, 3)
+        nframes += 1
         if fixed_origin is not None:
             rvec = arr - fixed_origin                       # all electrons - origin
         else:
@@ -383,7 +442,7 @@ def muon_srpd(case_name, rmax=None, nbins=None, r_search=0):
     origin_note = (f"fixed origin {np.round(fixed_origin, 3)}"
                    if fixed_origin is not None else "muon = last particle")
     print(f"=== case '{case_name}' : SRPD g(r) (observables.py method) ===")
-    print(f"files: {len(files)}, samples: {nsamples}; {origin_note}; rmax={rmax}, "
+    print(f"frames: {nframes}, samples: {nsamples}; {origin_note}; rmax={rmax}, "
           f"nbins={nbins}, r_search={r_search}")
     print(f"integral check: sum(up*binvol)={(up*bin_volume).sum():.3f} (expect ~"
           f"avg # up-e within {rmax} bohr), down={(dn*bin_volume).sum():.3f}")
@@ -418,7 +477,7 @@ def analyse(case_name):
     bc_site = (carbons[i] + carbons[j]) / 2
     bond = np.linalg.norm(min_image(carbons[i] - carbons[j]))
 
-    muons, nfiles = load_muons(cfg["positions"], cfg.get("n_particles", N_PARTICLES))
+    muons, nfiles = load_muons(cfg)
     print(f"=== case '{case_name}' ===")
     print(f"files: {nfiles}, muon samples: {len(muons)}")
     print(f"intended BC site (mid C{i}-C{j}): {np.round(bc_site, 3)} bohr "

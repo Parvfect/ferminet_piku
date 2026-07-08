@@ -23,11 +23,9 @@ Usage (ferminet-piku env):
 e.g. python tools/srpd_extended_radius.py silicon_bc_relaxed 6.0 120 4
 """
 import sys
-import glob
-import os
 import numpy as np
 
-from muon_site_analysis import CASES, N_PARTICLES
+from muon_site_analysis import CASES, iter_frames
 
 
 def main(case_name, rmax=6.0, nbins=120, stride=4):
@@ -43,7 +41,6 @@ def main(case_name, rmax=6.0, nbins=120, stride=4):
     L = np.array([[a, a, 0], [0, a, a], [a, 0, a]], float)
     LINV = np.linalg.inv(L)
     Vcell = abs(np.linalg.det(L))
-    ntot = cfg.get("n_particles", N_PARTICLES)
     n_up = cfg.get("n_up", 33)
     n_dn = cfg.get("n_dn", 32)
     rho_up, rho_dn = n_up / Vcell, n_dn / Vcell
@@ -57,11 +54,6 @@ def main(case_name, rmax=6.0, nbins=120, stride=4):
         print(f"WARNING: rmax {rmax} exceeds WS inscribed radius {ws:.2f}; "
               "shells beyond it under-count and dip below bulk.")
 
-    files = sorted(glob.glob(os.path.join(cfg["positions"], "positions_*.npy")))
-    if not files:
-        sys.exit(f"no positions_*.npy in {cfg['positions']}")
-    files = files[::stride]
-
     grids = np.linspace(0, rmax, nbins + 1)
     shellV = 4 * np.pi / 3 * (grids[1:]**3 - grids[:-1]**3)
     vol = 4 * np.pi / 3 * grids[1:]**3
@@ -69,8 +61,14 @@ def main(case_name, rmax=6.0, nbins=120, stride=4):
     up = np.zeros(nbins)
     dn = np.zeros(nbins)
     ns = 0
-    for fp in files:
-        arr = np.load(fp).reshape(-1, ntot, 3)
+    nframes = 0
+    # Frames come from inference dumps or, for checkpoint-only cases, the
+    # training checkpoints (see muon_site_analysis.iter_frames). stride
+    # subsamples frames (keep every stride-th).
+    for k, arr in enumerate(iter_frames(cfg)):
+        if k % stride:
+            continue
+        nframes += 1
         if fixed_origin is not None:
             rvec = arr - fixed_origin              # all electrons - fixed muon site
         else:
@@ -92,7 +90,7 @@ def main(case_name, rmax=6.0, nbins=120, stride=4):
     print(f"=== case '{case_name}' : extended-radius SRPD ===")
     print(f"Vcell={Vcell:.1f} bohr^3  rho_up={rho_up:.5f} rho_dn={rho_dn:.5f} e/bohr^3")
     print(f"WS inscribed radius (max valid r) ~ {ws:.2f} bohr")
-    print(f"files used: {len(files)} (stride {stride})  samples: {ns}\n")
+    print(f"frames used: {nframes} (stride {stride})  samples: {ns}\n")
     print(" r     g_up/bulk g_dn/bulk | N_up   N_dn   netSpin  netSpin_unif  localized_excess")
     for k in range(0, nbins, max(1, nbins // 20)):
         print(f"{cen[k]:4.2f}    {g_up[k]/rho_up:5.2f}     {g_dn[k]/rho_dn:5.2f}   |"
