@@ -27,7 +27,11 @@ SITE-DEPENDENT: diamagnetic at T, weak bond-centred muonium at BC.**
   → weak/partial **anisotropic BC muonium**, not a strong bound state.
 
 **Caveat:** #15 not converged — re-run inference at a later ckpt to confirm the
-+0.25 is stable.
++0.25 is stable. → **RESOLVED 2026-07-08:** independent checkpoint-walker sweep
+([[project-bound-state-formation-dynamics]]) shows peak excess **stable ~+0.22–0.28
+@ ~2.9–3.4 bohr from step 30k through 196k** (not just ckpt 78k). Bond-centred
+(contact ratio ≈1, zero contact enhancement), forms over step ~15k–40k. Confirms
+weak partial BC muonium, ~½ of diamond BC.
 
 ## Classical T-relaxed cross-check (#11) — 2026-07-01
 Inference (job 5451339) off #11 ckpt **196000 (well-trained)**, fixed-H at relaxed

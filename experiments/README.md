@@ -15,6 +15,8 @@ comparable and decisions are traceable.
 | [004](EXP-004_muon_width_burnin_diffusion.md) | Does a wider muon proposal + longer burn-in un-trap the muon (off-T → BC) without seeding? | implemented, ready to run (H0 the likely prior — run as diagnostic) | 2026-07-06 |
 | [005](EXP-005_frozen_adapter_muon_mobility.md) | Frozen-wide adapter (max muon mobility) — is the off-BC trap sampling or optimisation? | **H0 confirmed** — even permanently wide, muon collapses off-BC (0% BC); trap is an optimisation artefact, not proposal mobility | 2026-07-06 |
 | [006](EXP-006_energy_local_spin_decoupling.md) | Does the local muon spin density track the energy as it converges, or decouple? | **H0 confirmed** — decoupled: muonium structure (both ↑/↓ channels) frozen by ~50k while E falls 260–284 mHa; classical fixed-origin control rules out artefact; site verdicts valid on un-converged nets | 2026-07-08 |
+| [007](EXP-007_silicon_t_muonium_envelope_seeding.md) | Can we bind silicon T-site muonium (a real µSR state we miss)? Muon-anchored diffuse envelope + electron seeding + larger cell | planned — plane-wave PBC envelope has no muon-localized component; propose diffuse muon envelope + electron seed, staged vs 3×3×3 finite-size arm | 2026-07-08 |
+| [008](EXP-008_electron_seeding_muonium.md) | Does seeding an up-electron on the muon bind silicon T-muonium (basin-selection) or wash out (representability)? | planned — **classical fixed-muon vehicle** (isolates e⁻ binding, muon already an envelope centre, matched-geometry energy test vs #11); seed holds & E≤#11 ⇒ basin, else ⇒ EXP-007 | 2026-07-08 |
 
 ## Template
 
