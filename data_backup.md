@@ -12,11 +12,11 @@ Full plan: `.claude/plans/enchanted-inventing-flask.md`.
 ## Bucket A — Code + memory → GitHub
 | Step | Status | Notes |
 |---|---|---|
-| Sync live memory dir → repo `claude_memory/` (40 files) | ⬜ | overwrites stale Jul-1 mirror |
-| Commit docs (README + EXP-007/008) + memory on `muon_width` | ⬜ | |
-| Push `muon_width` to origin | ⬜ | |
-| Push `af` (1 commit ahead of origin/af) | ⬜ | avoid stranding committed work |
-| Verify: `git log origin/muon_width -1`, clean status | ⬜ | |
+| Sync live memory dir → repo `claude_memory/` (39 files) | ✅ | flat layout replaced stale `memories/` subdir |
+| Commit docs (README + EXP-007/008) + memory on `muon_width` | ✅ | commit fca72fa |
+| Push `muon_width` to origin | ✅ | origin/muon_width @ fca72fa |
+| Push `af` (1 commit ahead of origin/af) | ✅ | origin/af @ 68bb375 |
+| Verify: `git log origin/muon_width -1`, clean status | ✅ | working tree clean, in sync |
 
 ## Bucket B — Curated run data (~11.7 GB)
 Curated = newest checkpoint per run (67 dirs, 1.66 GB) + all `train_stats.csv`
@@ -25,11 +25,29 @@ Curated = newest checkpoint per run (67 dirs, 1.66 GB) + all `train_stats.csv`
 
 | Step | Status | Notes |
 |---|---|---|
-| Stage curated tree → `/projects/u6em/parv_backup_curated/` | ⬜ | `cp --parents` |
-| Fold in Bucket C (QE decks + SLURM `.out` logs) | ⬜ | tiny |
-| Write `MANIFEST.txt` (listing + du + sha256) | ⬜ | |
-| Verify staged counts (67 ckpts, 65 csv, 21,802 positions) | ⬜ | |
-| Archive → `parv_curated_backup_2026-08-17.tar.gz` | ⬜ | expect ~10-12 GB |
+| Stage curated tree → `/projects/u6em/parv_backup_curated/` | ✅ | rsync, 22,356 files, ~3 min |
+| Fold in Bucket C (QE decks + SLURM `.out` logs) | ✅ | `_extra/`: 32 QE decks (24K) + 19 logs (161M) + plan/tracker |
+| Write `MANIFEST.txt` (listing + du + sha256) | ✅ | 22,409 files checksummed |
+| Verify staged counts (67 ckpts, 65 csv, 21,802 positions) | ✅ | all exact; 422 srpd; total 12 GB |
+| Archive → `parv_curated_backup_2026-08-17.tar.gz` | ✅ | 9.6 GB, gzip -t OK, 22,533 members, sha256 `7990832d…` |
+
+## Bucket B2 — Checkpoint supplement (last-20 ckpts, no-dump key runs)
+Added after reviewing experiments: 6 runs (#17, #18, #13, #16, EXP-004/005) that
+never dumped inference positions — their muonium verdicts pool the last ~20
+checkpoints. See `backup_details.md` §3/§5.
+
+| Step | Status | Notes |
+|---|---|---|
+| Stage last-20 ckpts of 6 no-dump runs | ✅ | 120 files, 3.4 GB |
+| Archive → `parv_ckpts_supplement_2026-08-17.tar.gz` + MANIFEST | ✅ | 3.1 GB, sha256 `255081c6…` |
+| `backup_details.md` (systems/weights/where) written | ✅ | committed with tracker |
+
+## Transfer (user pulling locally)
+| Step | Status | Notes |
+|---|---|---|
+| Pull main archive + supplement + `.sha256` to local | ⬜ | user-driven |
+| `sha256sum -c` both on destination | ⬜ | main `7990832d…`, supp `255081c6…` |
+| Post-verify cleanup on-cluster (staging + archives) | ⬜ | only after local verify |
 
 ## Transfer + verify (needs SSH destination)
 | Step | Status | Notes |
