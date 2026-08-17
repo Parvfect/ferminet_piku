@@ -30,6 +30,9 @@ Pairs with [[training-monitoring]] (job scripts / logs / job names).
 | 13 | `diamond_2x2/t_relaxed/classical.sh` | `configs/diamond/t_relaxed/classical.py` | `/projects/u6em/parv/diamond/unpaired/classical/t_relaxed/pp` |
 | 14 | `diamond_2x2/bc_relaxed/bc_seeded.sh` | `configs/diamond/bc_relaxed/bc_seeded.py` | `/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_bc_seeded` |
 | 15 | `silicon/bc_seeded.sh` | `configs/silicon/bc_seeded.py` | `/projects/u6em/parv/silicon_unpaired/bc_seeded` |
+| 16 | `silicon/bc_relaxed_classical.sh` | `configs/silicon/bc_relaxed_classical.py` | `/projects/u6em/parv/silicon_unpaired/classical/bc_relaxed` |
+| 17 | `silicon/t_seeded.sh` | `configs/silicon/t_seeded.py` | `/projects/u6em/parv/silicon_unpaired/t_seeded` |
+| 18 | `diamond_2x2/t_relaxed/t_seeded.sh` | `configs/diamond/t_relaxed/t_seeded.py` | `/projects/u6em/parv/diamond/unpaired/t_seeded/pp` (NOT STARTED — created at launch) |
 
 Note (2026-06-22): jobs 10–13 are the new **T-relaxed** runs (DFT-relaxed
 geometry around the T-site muon). All four save dirs created empty 2026-06-22, no

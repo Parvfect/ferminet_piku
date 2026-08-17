@@ -97,17 +97,42 @@ def get_config():
     cfg.pretrain.iterations = 0
     cfg.log.restore_path = "train"
 
-    # --- EXP-004: wide muon proposal + long burn-in, unseeded ------------------
-    # Identical to bc_relaxed/pp except the MCMC proposal/burn-in schedule. The
-    # muon init stays the DEFAULT symmetric carbon-centred Gaussian (no BC seed:
-    # muon_init_coord is left None). The muon (last particle) starts with a wide
-    # proposal (0.3 ~= its healthy adapted width) while the electrons keep the
-    # usual move_width=0.02; each species adapts its own width in the training
-    # loop. The long burn-in equilibrates walkers to |psi_fresh|^2 (with the
-    # muon mixing broadly) before the optimizer starts localising psi. See
-    # experiments/EXP-004_muon_width_burnin_diffusion.md.
-    cfg.mcmc.muon_move_width = 0.3   # electrons stay at the default 0.02
-    cfg.mcmc.burn_in = 2000
+    # --- EXP-005: FROZEN adapter (wide muon held wide all run), unseeded --------
+    # Follow-up to EXP-004 (pp_wide_burnin_v3), which showed a one-shot wide muon
+    # init does NOT un-trap the muon: the adaptive width collapsed 0.30 -> 0.072
+    # within ~1500 steps (adapter drives the muon to ~50% acceptance, which the
+    # sharpening psi puts at ~0.08 bohr), the ensemble committed to a single
+    # basin by step ~700, and the muon localised at a T-type interstitial 3.2
+    # bohr from BC (H1 falsified). See experiments/EXP-005.
+    #
+    # EXP-005 removes MCMC mobility as a confound entirely by FREEZING the
+    # proposal width for the whole run: the muon stays at its wide 0.3 bohr
+    # proposal (which equilibrated to a 2.6-bohr cell-spanning cloud during v3's
+    # burn-in) for every optimiser step in the selection window, so the muon is
+    # maximally mobile throughout. Logic: if the muon STILL localises off-BC with
+    # a permanently-wide proposal, the trap is an OPTIMISATION / representability
+    # artifact, not a sampling one -> next lever is an envelope-level muon bias,
+    # not a slower adapter. If it un-traps to BC, sampling mobility WAS the lever.
+    #
+    # Freeze mechanism (ZERO code change): adapt_frequency is set larger than the
+    # scientifically-relevant window so update_mcmc_width never fires
+    # (`if t > 0 and t % adapt_frequency == 0`). We use 100000 (NOT ~1e9) because
+    # the pmoves buffer is allocated np.zeros((nspecies, adapt_frequency)) in
+    # train.py -- 1e9 would try to allocate ~24 GB and OOM at startup, whereas
+    # 100000 is a ~2.4 MB buffer and still freezes the width for the first
+    # 100k steps (20x past the ~5k selection window; the muon site is long
+    # decided before the adapter's first possible firing at t=100000).
+    #
+    # A ~25% muon acceptance at width 0.3 is expected and FINE: it is near the
+    # RWM efficiency optimum (~0.234), Metropolis is unbiased for any proposal
+    # width, and 0.3 ~= 1-2x the localised muon's per-axis density width, so it
+    # remains an efficient in-site sampler even if psi localises. Electrons are
+    # frozen at move_width=0.07 (near their v3-adapted 0.084 equilibrium) so all
+    # species sit in a healthy sampling regime for the whole frozen run.
+    cfg.mcmc.muon_move_width = 0.3     # muon proposal, held wide (frozen)
+    cfg.mcmc.move_width = 0.07         # electron proposal, frozen near equilibrium
+    cfg.mcmc.adapt_frequency = 100000  # >> selection window => width never adapts
+    cfg.mcmc.burn_in = 2000            # equilibrate walkers to |psi_fresh|^2
 
     return cfg
 
@@ -134,15 +159,15 @@ if __name__ == '__main__':
     cfg.log.save_freq = 100
     cfg.log.save_tfreq = 235
     # Fresh net: brand-new empty save_path, restore_path == save_path so no
-    # off-T bc_relaxed/pp checkpoint can contaminate the run (EXP-004 risk #1).
-    # v3: v1 (pp_wide_burnin) and v2 (pp_wide_burnin_v2) both launched from a
-    # train.py that predated the muon_move_width block (stale bytecode / launch
-    # before the edit landed), so their ckpt_000000 muon width is 0.02, not 0.3
-    # -- they never tested H1. Confirmed via tools/muon_width_check.py. v3 runs
-    # the verified current code (muon inits at 0.3, no burn-in adaptation) into a
-    # fresh dir. Verify the "Initial MCMC width per species: [0.02 0.02 0.3]" log
-    # line and ckpt_000000 muon width before trusting the run.
-    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_wide_burnin_v3"
+    # off-T bc_relaxed/pp checkpoint (or any v3 checkpoint) can contaminate the
+    # run (EXP-004 confound #1). Pre-launch check on the compute node before
+    # trusting the run (same protocol as v3):
+    #   * log says "No checkpoint found. Training new model."
+    #   * log prints "Initial MCMC width per species: [0.07 0.07 0.3]"
+    #   * ckpt_000000 has muon width 0.3, electrons 0.07, and the muon walkers
+    #     are a broad diffuse cloud (NOT pinned to a site).
+    #   * confirm the width STAYS 0.3/0.07 at ckpt_000100..002000 (never adapts).
+    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_wide_burnin_frozen"
     cfg.log.restore_path = cfg.log.save_path
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"

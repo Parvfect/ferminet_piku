@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=muon_d_qpp_bc_rel_widebi_v3
-#SBATCH --output=muon_wide_burnin_v3.out
+#SBATCH --job-name=muon_silicon_q_t_seeded_inf
+#SBATCH --output=inference_t_seeded.out
 #SBATCH --nodes=8
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-00:00:00
 hostname
 cd ~
-source /home/u6em/parvfection.u6em/miniforge3/bin/activate
+source ~/miniforge3/bin/activate
 conda activate ferminet-piku
 
 pwd
@@ -23,4 +23,4 @@ IP_ADDR=$(ifconfig 2> /dev/null | awk '$1 == "inet" {print $2}' | head -n 2 | ta
 srun --nodes=8 \
      --gres=gpu:4 \
      --export=ALL \
-     python -u ferminet/configs/diamond/bc_relaxed/wide_burnin.py --server_addr="$IP_ADDR:$PORT"
+     python -u ferminet/configs/silicon/inference_t_seeded.py --server_addr="$IP_ADDR:$PORT"

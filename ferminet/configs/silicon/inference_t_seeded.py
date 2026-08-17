@@ -6,9 +6,9 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('server_addr', '',
                     help=('Enables multihost calculations if given. '
                           'Server ip address of host node'))
+
 node_id = os.environ['SLURM_NODEID']
 visible_devices = [int(gpu) for gpu in os.environ['CUDA_VISIBLE_DEVICES'].split(',')]
-
 
 
 def get_config():
@@ -23,40 +23,46 @@ def get_config():
 
     MUON_MASS = 206.7682827
 
-    # Set up molecule
-    a = 6.74  # Lattice constant in bohr
+    # Silicon lattice constant (bohr)
+    a = 10.26  # ~5.43 Å
+
+    # 16 Si atoms → 64 valence electrons (with pseudopotential)
     cfg.system.particles = (33, 32, 1)
     cfg.system.charges = (-1., -1., 1.)
     cfg.system.masses = (1., 1., MUON_MASS)
 
-    # Carbon positions from the BC muon run relaxed in DFT with an unpaired
-    # electron (open-shell). Cubic-coordinate units (fractions of a); multiply by
-    # a for cartesian bohr. Muon (H) at 0.125, 0.125, 0.125.
-    # Geometry MUST match training config pp_relax_2.py exactly.
+    # 2x2x2 diamond supercell (16 atoms), T-relaxed for an unpaired-electron muon
+    # at the tetrahedral interstitial (0.75, 0.75, 0.75)*a. Coordinates are the
+    # DFT-relaxed positions in units of `a` (see musr/analysis/silicon_coordiantes.py,
+    # `atomic_positions_t_relaxed`). Relaxation is small: only the 4 Si coordinating
+    # the muon move (~0.0487 bohr inward), a -1.1% T-cage contraction.
+    # Geometry MUST match training config t_seeded.py exactly (identical to
+    # t_relaxed.py; t_seeded only differs by the muon MCMC seed, which is
+    # irrelevant at inference where the walkers are restored from the ckpt).
     cfg.system.molecule = [
-    system.Atom('C', ( -0.05139189*a,  -0.05139189*a,  -0.05139188*a)),
-    system.Atom('C', (  0.30148672*a,   0.30148672*a,   0.30148671*a)),
-    system.Atom('C', (  0.50344702*a,   0.50344703*a,   0.00524092*a)),
-    system.Atom('C', (  0.74702714*a,   0.74702712*a,   0.24485391*a)),
-    system.Atom('C', (  0.50344701*a,   0.00524094*a,   0.50344701*a)),
-    system.Atom('C', (  0.74702714*a,   0.24485389*a,   0.74702714*a)),
-    system.Atom('C', (  1.00212309*a,   0.49931984*a,   0.49931985*a)),
-    system.Atom('C', (  1.24873038*a,   0.75115431*a,   0.75115431*a)),
-    system.Atom('C', (  0.00524093*a,   0.50344703*a,   0.50344702*a)),
-    system.Atom('C', (  0.24485390*a,   0.74702712*a,   0.74702714*a)),
-    system.Atom('C', (  0.49931984*a,   1.00212309*a,   0.49931985*a)),
-    system.Atom('C', (  0.75115432*a,   1.24873039*a,   0.75115431*a)),
-    system.Atom('C', (  0.49931984*a,   0.49931984*a,   1.00212309*a)),
-    system.Atom('C', (  0.75115432*a,   0.75115431*a,   1.24873038*a)),
-    system.Atom('C', (  0.99994427*a,   0.99994428*a,   0.99994427*a)),
-    system.Atom('C', (  1.25090921*a,   1.25090920*a,   1.25090921*a)),
+        system.Atom('Si', (-0.00067502*a, -0.00067507*a, -0.00067507*a)),
+        system.Atom('Si', (0.50067447*a, 0.50067444*a, -0.00067510*a)),
+        system.Atom('Si', (-0.00067507*a, 0.50067440*a, 0.50067444*a)),
+        system.Atom('Si', (0.50067443*a, -0.00067511*a, 0.50067443*a)),
+        system.Atom('Si', (0.50273842*a, 0.99725963*a, 0.50273848*a)),
+        system.Atom('Si', (0.99725956*a, 0.50273849*a, 0.50273853*a)),
+        system.Atom('Si', (0.50273848*a, 0.50273854*a, 0.99725958*a)),
+        system.Atom('Si', (0.99725948*a, 0.99725952*a, 0.99725955*a)),
+        system.Atom('Si', (0.24999972*a, 0.24999967*a, 0.24999969*a)),
+        system.Atom('Si', (0.74999906*a, 0.74999903*a, 0.24997919*a)),
+        system.Atom('Si', (0.24997923*a, 0.74999905*a, 0.74999903*a)),
+        system.Atom('Si', (0.74999907*a, 0.24997917*a, 0.74999902*a)),
+        system.Atom('Si', (0.74999898*a, 1.25001884*a, 0.74999901*a)),
+        system.Atom('Si', (1.25001885*a, 0.74999897*a, 0.74999902*a)),
+        system.Atom('Si', (0.74999903*a, 0.74999902*a, 1.25001882*a)),
+        system.Atom('Si', (1.24999827*a, 1.24999842*a, 1.24999838*a)),
     ]
 
     cfg.system.atoms = cfg.system.molecule
 
     # Pseudopotential setup
     cfg.system.use_pp = True
-    cfg.system.pp.symbols = ['C']
+    cfg.system.pp.symbols = ['Si']
 
     mol = gto.Mole()
     mol.atom = [[atom.symbol, atom.coords] for atom in cfg.system.molecule]
@@ -84,7 +90,7 @@ def get_config():
     # No pretraining for PBC
     cfg.pretrain.method = None
 
-    # Primitive cell of fcc
+    # Supercell lattice vectors (kept same structure)
     cfg.system.pbc.lattice_vectors = np.array([
         [a, a, 0],
         [0, a, a],
@@ -121,26 +127,24 @@ if __name__ == '__main__':
 
     cfg = get_config()
 
-    # Inference config: restore the trained bc_seeded (EXP-002) checkpoint and
-    # sample muon positions. No optimisation (optimizer="none"); positions for the
-    # first 1000 steps are written to <save_path>/positions/positions_{t}.npy.
+    # Inference (EXP-003b): restore the trained silicon T-SEEDED quantum checkpoint
+    # (#17, job family muon_silicon_q_t_seeded) and sample muon positions. No
+    # optimisation (optimizer="none"); positions for the first 1000 steps are
+    # written to <save_path>/positions/positions_{t}.npy. The SRPD bound-state
+    # (muonium) check is computed post-hoc from these positions by
+    # tools/muon_site_analysis.py + tools/srpd_extended_radius.py. KEY question:
+    # does the T-seeded silicon muon form a bound state (muonium), or stay
+    # DIAMAGNETIC like the unseeded/other silicon runs?
     cfg.optim.iterations = 10000000
     cfg.log.save_freq = 2000000
     cfg.log.save_tfreq = 235000
     cfg.log.restore_from_checkpoint = True
-    # Trained checkpoints live here (bc_seeded training job 5370014 writes them
-    # directly). Inference picks up the latest checkpoint at launch time.
-    cfg.log.restore_path = "/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_bc_seeded"
+    # Trained checkpoints live in the #17 training save dir (latest at launch).
+    cfg.log.restore_path = "/projects/u6em/parv/silicon_unpaired/t_seeded"
     # Fresh inference output dir: find_last_checkpoint(save_path) returns None and
     # falls back to restore_path. Positions land in <save_path>/positions.
-    cfg.log.save_path = "/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_bc_seeded/inference"
+    cfg.log.save_path = "/projects/u6em/parv/silicon_unpaired/t_seeded/inference"
     cfg.observables.positions = True
-    # Spin-resolved pair density for the QUANTUM muon: measured relative to the
-    # muon's instantaneous position (the last particle in the (33,32,1) walker),
-    # NOT a fixed origin. use_fixed_origin=True is only for the classical
-    # fixed-muon runs, whose walkers have no muon particle (2-tuple nspins).
-    cfg.observables.srpd.calculate = True
-    cfg.observables.srpd.use_fixed_origin = False
     cfg.optim.reset_if_nan = True
     cfg.optim.laplacian = "folx"
     cfg.optim.optimizer = "none"

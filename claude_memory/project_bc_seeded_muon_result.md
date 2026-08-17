@@ -50,6 +50,29 @@ Seeding the muon at BC makes it HOLD BC; default init falls into the off-T trap
 sampling/init trap, not the true minimum, exactly as classical DFT predicted (BC is
 the true min, ~70 mHa below off-T). See [[project-bc-relaxed-pp-relax-2-muon-result]].
 
+### ★ ENERGY VERDICT — the seed-independent clincher (refreshed 2026-07-08)
+`tools/energy_convergence.py` on the live csvs (`ferminet-piku` env python at
+`/home/u6em/parvfection.u6em/miniforge3/envs/ferminet-piku/bin/python`):
+- **#14 diamond bc_seeded @580k = −90.69597 ± 0.00019 E_h — CONVERGED** (slope flat
+  −3.5e-8/step, drift < tol). Now **~26.9 mHa BELOW #8 off-T −90.66904 ± 0.00029**,
+  the **lowest quantum diamond run**, statistically tied with classical fixed-T #7
+  −90.69624 (Δ≈0.3 mHa < SEM).
+- **Why this matters:** the earlier 176k read (−90.655) was NOT converged and sat
+  ABOVE off-T (−90.669), which a sceptic can (correctly) use to argue off-T is the
+  better variational state. That objection is now DEAD: a lower ⟨H⟩ is a better GS
+  estimate regardless of how the walkers were initialised, so the seeded-BC-below-off-T
+  energy is the one **seed-independent** proof that BC (not off-T) is the muon's site,
+  confirming the classical EXP-001 ordering *within the quantum theory*.
+- Silicon analogue: **#17 t_seeded @224k = −62.89124 ± 0.00051** (noise-limited) sits
+  ~17.3 mHa BELOW the unseeded-fled #10 t_relaxed −62.87392 → seeding into the
+  contracted relaxed cage is genuinely lower-E, so the Si "muon flees the tight cage"
+  result ([[project-silicon-quantum-muon-result]], EXP-003) was a basin-selection
+  trap, NOT a ZPM preference (the ZPE penalty for a tighter well is real but
+  sub-dominant). #15 bc_seeded @196k = −62.89170 ± 0.00022 (descending), ~similar.
+- Synthesis doc written this session: **`localization_optimization_interplay.md`**
+  (repo root) — ties EXP-001/002/003/004/005 into the localization–optimization
+  argument, updated with these converged numbers.
+
 ### Re-run at well-trained net (2026-06-30) — CONFIRMS and tightens the result
 Re-ran inference (job 5426303) on the **~176k net** (E −90.655, vs 56k/−90.42 above);
 dumped all 1000 positions. Result reproduces and sharpens the 56k read:

@@ -229,13 +229,63 @@ step 3a; instantaneous noisy energies):
 | Diamond, BC-relaxed (charged-state DFT, expanded BC), PP quantum muon [ACTIVE] | `ferminet/jobs/diamond_2x2/bc_relaxed/pp_relaxed_2.sh` | `ferminet/jobs/diamond_2x2/bc_relaxed/pp_relax_2.out` | `muon_d_qpp_bc_rel_2` | `ferminet/jobs/diamond_2x2/bc_relaxed/` |
 | Silicon, BC-relaxed, PP quantum muon [CLOSED — stopped 2026-06-27 @138k, muon drifted to T cage] | `ferminet/jobs/silicon/bc_relaxed.sh` | `ferminet/jobs/silicon/muon_silicon_q_bc_relaxed.out` | `muon_silicon_q_bc_relaxed` | `ferminet/jobs/silicon/` |
 | #10 Silicon, T-relaxed, PP quantum muon [CLOSED — stopped 2026-06-29, muon avoided relaxed cage] | `ferminet/jobs/silicon/t_relaxed.sh` | `ferminet/jobs/silicon/t_relaxed.out` | `muon_silicon_q_t_relaxed` | `ferminet/jobs/silicon/` |
-| #11 Silicon, T-relaxed, classical muon (fixed-H, PP) [ACTIVE] | `ferminet/jobs/silicon/t_relaxed_classical.sh` | `ferminet/jobs/silicon/t_relaxed_classical.out` | `muon_silicon_c_t_relaxed` | `ferminet/jobs/silicon/` |
-| #12 Diamond, T-relaxed, PP quantum muon [ACTIVE — job 5358557, submitted 2026-06-23] | `ferminet/jobs/diamond_2x2/t_relaxed/pp.sh` | `ferminet/jobs/diamond_2x2/t_relaxed/pp.out` | `muon_d_qpp_t_rel` | `ferminet/jobs/diamond_2x2/t_relaxed/` |
+| #11 Silicon, T-relaxed, classical muon (fixed-H, PP) [CLOSED — BLEW UP @step 306603 2026-07-06, job 5501849 FAILED; last clean ckpt 306000; user left stopped. Recover: move 308k–330k ckpts aside + truncate csv ≤306602 + sbatch] | `ferminet/jobs/silicon/t_relaxed_classical.sh` | `ferminet/jobs/silicon/t_relaxed_classical.out` | `muon_silicon_c_t_relaxed` | `ferminet/jobs/silicon/` |
+| #12 Diamond, T-relaxed, PP quantum muon [CLOSED — STOPPED 2026-07-04 @478k −90.65979; muon HELD relaxed cage (muonium), superseded by T-SEEDED #18] | `ferminet/jobs/diamond_2x2/t_relaxed/pp.sh` | `ferminet/jobs/diamond_2x2/t_relaxed/pp.out` | `muon_d_qpp_t_rel` | `ferminet/jobs/diamond_2x2/t_relaxed/` |
 | #13 Diamond, T-relaxed, classical muon (fixed-H, PP) [ACTIVE — job 5402669, FIRST launch 2026-06-27] | `ferminet/jobs/diamond_2x2/t_relaxed/classical.sh` | `ferminet/jobs/diamond_2x2/t_relaxed/classical.out` | `muon_d_cpp_t_rel` | `ferminet/jobs/diamond_2x2/t_relaxed/` |
 | #14 Diamond, BC-seeded PP quantum muon (EXP-002) [ACTIVE — job 5370014, submitted 2026-06-24] | `ferminet/jobs/diamond_2x2/bc_relaxed/bc_seeded.sh` | `ferminet/jobs/diamond_2x2/bc_relaxed/bc_seeded.out` | `muon_d_qpp_bc_seeded` | `ferminet/jobs/diamond_2x2/bc_relaxed/` |
 | #15 Silicon, BC-seeded PP quantum muon (EXP-002) [ACTIVE — job 5395609, SUBMITTED 2026-06-27, width 0.45] | `ferminet/jobs/silicon/bc_seeded.sh` | `ferminet/jobs/silicon/bc_seeded.out` | `muon_silicon_q_bc_seeded` | `ferminet/jobs/silicon/` |
-| #16 Silicon, BC-relaxed classical muon (fixed-H @ BC, PP) [NOT STARTED — config/script not yet written] | `ferminet/jobs/silicon/bc_relaxed_classical.sh` (TO CREATE) | `ferminet/jobs/silicon/bc_relaxed_classical.out` | `muon_silicon_c_bc_relaxed` | `ferminet/jobs/silicon/` |
+| #16 Silicon, BC-relaxed classical muon (fixed-H @ BC, PP) [ACTIVE — config/script WRITTEN + LAUNCHED 2026-07-05, job 5501873, follow-up 5501876] | `ferminet/jobs/silicon/bc_relaxed_classical.sh` | `ferminet/jobs/silicon/bc_relaxed_classical.out` | `muon_silicon_c_bc_relaxed` | `ferminet/jobs/silicon/` |
 | #17 Silicon, T-seeded PP quantum muon (EXP-003b) [ACTIVE — job 5419590, SUBMITTED 2026-06-29, seed (0.75a)³, width 0.5] | `ferminet/jobs/silicon/t_seeded.sh` | `ferminet/jobs/silicon/t_seeded.out` | `muon_silicon_q_t_seeded` | `ferminet/jobs/silicon/` |
+| #18 Diamond, T-seeded PP quantum muon (EXP-003b, diamond analogue of #17) [ACTIVE — job 5491822 SUBMITTED 2026-07-04, follow-up 5491823; seed (0.7502845a)³, width 0.35] | `ferminet/jobs/diamond_2x2/t_relaxed/t_seeded.sh` | `ferminet/jobs/diamond_2x2/t_relaxed/t_seeded.out` | `muon_d_qpp_t_seeded` | `ferminet/jobs/diamond_2x2/t_relaxed/` |
+| #19 Diamond, BC-relaxed WIDE-muon-proposal PP quantum muon (EXP-004) [ACTIVE — job 5514175 SUBMITTED 2026-07-06; UNSEEDED, muon_move_width=0.3, burn_in=2000] | `ferminet/jobs/diamond_2x2/bc_relaxed/wide_burnin.sh` | `muon_wide_burnin.out` (in repo root, NOT the jobs dir) | `muon_d_qpp_bc_rel_widebi` | `ferminet_piku/` (repo root — where sbatch was run) |
+
+**#18 Diamond T-seeded (added 2026-07-04, NOT STARTED):** diamond analogue of #17. Same
+geometry as #12 `diamond/t_relaxed/pp.py` (T-relaxed diamond cage, +0.4% expanded, particles
+`(33,32,1)` quantum muon doublet, PP on C, a=6.74) but the **muon walkers are seeded at the
+relaxed T-site** via `cfg.mcmc.muon_init_coord=(0.7502845*a,)*3` (verified centroid of the 4
+expanded C #4-#7, 2.9305 bohr equidistant), `width 0.35` (scaled from Si's 0.5 by the T-cage
+size ratio diamond 2.93/Si 4.39). Config `configs/diamond/t_relaxed/t_seeded.py` (py_compile
+clean), script `jobs/diamond_2x2/t_relaxed/t_seeded.sh`. save `/projects/u6em/parv/diamond/
+unpaired/t_seeded/pp`, fresh net (restore==save). **LAUNCHED 2026-07-04: job 5491822 (PENDING/Priority),
+follow-up 5491823 (afterany:5491822). Empty save dir created before submit → fresh net guaranteed.**
+NOTE unlike silicon (#10 muon FLED the
+contracted cage → motivated #17), the diamond #12 unseeded muon already HELD the expanded relaxed
+cage as muonium ([[project-diamond-t-relaxed-muon-result]]); #18 seeds inside for a clean symmetric
+comparison with #17 and to confirm the held state isn't a warm-start/init artifact. **Sanity check
+owed once it RUNS:** fresh-net log line ("Training new model"), muon seeds at cubic-frac ≈0.7503
+coordinated by the expanded C #4-#7, no early NaN.
+
+**#19 Diamond BC-relaxed WIDE muon proposal (EXP-004, SUBMITTED 2026-07-06, job 5514175).**
+Same geometry/setup as #5 `diamond/bc_relaxed/pp.py` (BC-relaxed cage, particles `(33,32,1)`
+quantum muon doublet, PP on C, a=6.74) and muon left at the DEFAULT carbon-centred init
+(UNSEEDED, `muon_init_coord=None`) — this is the complement to the BC-seeded #14. The only
+changes vs #5: the muon starts with a WIDE proposal `cfg.mcmc.muon_move_width=0.3` (new
+per-species knob; electrons stay at move_width=0.02, each species adapts its own width
+after) and `cfg.mcmc.burn_in=2000`. Config `configs/diamond/bc_relaxed/wide_burnin.py`,
+FRESH net (`restore_path==save_path==/projects/u6em/parv/diamond/unpaired/bc_relaxed/
+pp_wide_burnin`, created empty before submit → "Training new model"). Launcher matches the
+running bc_seeded convention (`cd ~/ferminet_piku`, parvfect miniforge; NOT the stale
+ferminet_remote/pp.sh paths). Tests whether keeping the muon proposal wide through the
+early selection window un-traps it off-T→BC without seeding — see EXP-004; **H0 (re-collapse
+to off-T) is the likely prior**, run as a diagnostic. Code: `base_config.mcmc.muon_move_width`
+(default None → byte-identical to before) + `train.py` per-species width-init branch.
+[[project-muon-mcmc-width-diffusion]], `experiments/EXP-004_muon_width_burnin_diffusion.md`.
+
+**Checks owed once #19 has RUN a little (first ~few k steps / first checkpoints):**
+1. **Fresh net:** `.out` shows "No checkpoint found. Training new model." (NOT a warm-start
+   restore — EXP-004 confound #1; re-verify after every afterany restart).
+2. **Initial widths:** muon `mcmc_width` = 0.3, electrons = 0.02 (the patch worked); and the
+   muon walkers are at the DEFAULT carbon-centred spread, NOT at BC (unseeded).
+3. **No early NaN:** electrons at 0.02 should be calm; `reset_if_nan` is on — watch the first
+   ~5k steps.
+4. **H1-vs-H0 fast read** — `tools/muon_diffusion_check.py` on the save_path
+   (`--a 6.74 --particles 33,32,1 --site offT=0.474,0.474,0.474 --site BC=0.125,0.125,0.125`):
+   H1 = early spread stays large past step ~2000 and settles on BC (0.125); H0 = collapses to
+   ~0.15 bohr by ~2000 steps as in the off-T `bc_relaxed/pp` run.
+5. **Width sanity** — `tools/muon_width_check.py --last`: muon stayed wide early, electrons
+   ~0.02→~0.08 (rules out any electron-instability effect).
+6. **Site + energy** — mid-training inference + `muon_site_analysis.py`: peak at BC (0.125)
+   vs off-T (0.474); track block-avg VMC energy vs the off-T run's −90.669 Ha (below = H1).
 
 This 7th job (added 2026-06-15) uses the unpaired-up-spin setup
 `cfg.system.particles = (33, 32)` (65 e⁻, mol.charge=1, PP on C, H at

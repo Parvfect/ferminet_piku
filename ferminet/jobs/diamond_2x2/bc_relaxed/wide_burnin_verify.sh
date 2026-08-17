@@ -7,7 +7,7 @@
 #SBATCH --time=0-01:00:00
 hostname
 cd ~
-source /home/u6em/parvfect.u6em/miniforge3/bin/activate
+source /home/u6em/parvfection.u6em/miniforge3/bin/activate
 conda activate ferminet-piku
 
 pwd

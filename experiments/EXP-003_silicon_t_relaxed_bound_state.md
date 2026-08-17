@@ -196,5 +196,9 @@ fixed-H SRPD once available).
       matches #9 bc_relaxed baseline. **H0 confirmed.**
 - [ ] **Open control:** repeat inference at a later (more converged) #10 checkpoint
       to confirm the diamagnetic verdict is stable on the converging net.
-- [ ] **Open cross-check:** classical fixed-H SRPD from #11 (`silicon c t_relaxed`)
-      as the contact-density upper bound, once #11 is far enough along.
+- [x] **Cross-check DONE (EXP-003b, 2026-07-08):** classical fixed-H SRPD from #11
+      (`silicon_classical_t_relaxed`) — diamagnetic, spin-symmetric contact
+      (∫≤1 bohr: 0.192 up vs 0.199 down). Upper bound confirms H0.
+- [x] **Seeded follow-up DONE (EXP-003b, 2026-07-08):** #17 t_seeded holds the
+      relaxed cage (RMS 0.78 bohr at 7.695³) and is still **diamagnetic** — the
+      intended relaxed-cage binding test is now actually performed. H0 confirmed.

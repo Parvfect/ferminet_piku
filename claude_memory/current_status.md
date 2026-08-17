@@ -1,11 +1,405 @@
 ---
 name: current-status
-description: "Snapshot of the most recent session's focus and open threads — overwrite/update this each session rather than appending"
+description: "Snapshot of the most recent session's focus and open threads — overwrite/update this each session rather than appending. LATEST (2026-08-17): CLUSTER EXPIRING — curated data backup DONE (GitHub + tar archives), no active jobs; next = restore on new cluster + run EXP-008/007 (bind silicon T-muonium)."
 metadata: 
   node_type: memory
   type: project
   originSessionId: cd7babd3-df02-4561-aef6-eb933702fa94
 ---
+
+## As of 2026-08-17 (branch `muon_width`) — CLUSTER EXPIRING: full data backup DONE; no active jobs; project written up for handoff
+
+**~40-day gap since the last session (2026-07-08).** The HPC cluster is being
+decommissioned — both `/home/u6em/parvfection.u6em` and `/projects/u6em/parv`
+disappear. `squeue` empty; NO active training/inference jobs (the #13–#19 daily
+rotation wound down long ago). This session = back up everything + write the
+project up for a clean restart elsewhere. **Nothing is running; nothing to
+resubmit here.** The daily-monitoring routine in [[training-monitoring]] is
+effectively retired until runs are relaunched on a new cluster.
+
+**Backup COMPLETE (3 locations):**
+1. **GitHub** `git@github.com:Parvfect/ferminet_piku.git` — pushed `muon_width`
+   @ `fa49945` (all code/configs/jobs/tools/experiments + `claude_memory/`
+   refreshed with the 39 live memory files + new docs) and `af` @ `68bb375`.
+   Everything code/text is safe here. Env reproducible from `requirements.txt`
+   (conda `ferminet-piku`).
+2. **Main data archive** `/projects/u6em/parv_curated_backup_2026-08-17.tar.gz`
+   (9.6 GB, sha256 `7990832da8…f7c7229`) — newest ckpt/run (67) + ALL
+   `train_stats.csv` (65) + ALL current inference `positions_*.npy` (21,802) +
+   `srpd_*.txt` (422) + `_extra/` (QE `.in/.out` decks, SLURM `.out` logs). Has
+   `MANIFEST.txt` (per-file sha256). Curated 272 GB→12 GB (dropped 8,860→67
+   redundant ckpts). Staging tree also on-cluster: `parv_backup_curated/`.
+3. **Checkpoint supplement** `/projects/u6em/parv_ckpts_supplement_2026-08-17.tar.gz`
+   (3.1 GB, sha256 `255081c66c…795ae59`) — last-20 ckpts of the 6 **no-inference-
+   dump** key runs (#17 si t_seeded, #18 d t_seeded, #13 d classical t_relaxed,
+   #16 si classical bc_relaxed, EXP-004 `pp_wide_burnin_v3`, EXP-005
+   `pp_wide_burnin_frozen`) so their muonium SRPD verdicts stay reproducible
+   (analysis pools the last ~20 ckpts' `data/positions`). Staging:
+   `parv_backup_ckpts_supplement/`.
+
+**User is transferring the archives to a personal/institutional machine
+themselves** (pull), and will verify on the NEW cluster. Told them: don't delete
+`/projects` until `sha256sum -c` passes on the destination.
+
+**New docs written & committed this session (all in repo root / experiments/):**
+- `context.md` — full project results writeup (intro, per-system results, EXP
+  summary table, next steps). Good starting read next time.
+- `backup_details.md` — every system's weights location in the backup, posdump
+  status, verdict, + restore/re-analysis instructions.
+- `data_backup.md` — backup process tracker/log.
+- `experiments/EXP-007…md` + `EXP-008…md` (were untracked, now committed) — the
+  planned silicon-T-muonium experiments.
+
+**⚠️ KNOWN BACKUP DEFECT (checkpoint audit, 67 scanned for blown-up/NaN weights):**
+- `silicon_unpaired/classical/t_relaxed` newest ckpt **330000 is CORRUPT**
+  (|param|max ≈ 2.5e11, post-blow-up — blew up at step ~306603). The last CLEAN
+  weight is **`qmcjax_ckpt_306000.npz`** (|param| ≈ 33), still in source at
+  `/projects/u6em/parv/silicon_unpaired/classical/t_relaxed/`. **NOT yet swapped
+  into the backup** (user interrupted before the fix; staging untouched). If that
+  run is ever resumed, grab 306000 separately. Its science is unaffected (came
+  from the inference dump). Also `muonioum/002000` is NaN but it's a dead
+  throwaway molecule test (real one = `muonioum2/178000`, clean). All other 65
+  newest ckpts healthy.
+
+**★ Useful fact re mismatch-safety (learned this session):** the FermiNet
+`qmcjax_ckpt_*.npz` `data` dict **embeds the geometry** — `atoms`, `charges`,
+`positions` (→ n_particles), `spins` (→ up/dn split), plus `mcmc_width` (len =
+n_species) and `params` (→ net architecture). So a checkpoint can be validated
+against a config (compare atoms/charges) and restore fails LOUDLY on shape
+mismatch — can't silently load wrong weights. Physics knobs NOT in the ckpt
+(muon mass, PP, lattice vecs, envelope type) live in the git `configs/*.py`,
+mapped per save_path in `backup_details.md` / [[job-save-paths]].
+
+**>>> NEXT SESSION (on the new cluster): <<<**
+1. Rebuild env (`requirements.txt`, conda `ferminet-piku`), clone repo, restore
+   weights from the archives (see `backup_details.md` §4). Verify with
+   `sha256sum -c`.
+2. Science frontier = **bind silicon T-site muonium** (the one µSR state we miss;
+   see `context.md` §5). Run order: **EXP-008** (electron seeding on classical
+   fixed Si-T muon — cheap basin-vs-representability discriminator, needs only
+   `mcmc.electron_init_coord/_width` plumbing in `init.py`/`base_config.py`) →
+   if it washes out, **EXP-007** (muon-anchored diffuse envelope + 3×3×3 cell).
+   Full designs in `experiments/EXP-007/008.md`, [[project-experiments]].
+3. Science state is SETTLED for the writeup: diamond = muonium at T (contact) &
+   BC (bond-orbital); silicon-T = diamagnetic, BC = weak muonium; off-BC =
+   optimisation artefact (EXP-005); energy⟂local-spin decoupling (EXP-006).
+
+---
+
+## As of 2026-07-07 (#3, branch `muon_width`) — daily monitoring: #18 hung→resubmitted; #13 soft blow-up→restarted from pre-spike ckpt; swapped Si bc_seeded inference → t_seeded inference (bound-state test)
+
+**Daily training-monitoring check + 4 actions (all user-directed).** 7 training jobs were RUNNING (#13–#19)
++ 2 inference. Energies (block-avg, none converged): **★ #14 d bc_seeded @570k −90.69682 ± 0.00029** (now
+just below classical fixed-T #7 −90.69624, ~28 mHa below #8 off-T — lowest quantum diamond); **★ #17 si
+t_seeded @218k −62.89249 ± 0.00017** (lowest quantum Si, ~21 mHa below frozen #10); #15 si bc_seeded @190k
+−62.89198; #16 si classical bc_rel @58k −62.87677 (climbing out of warm-up, follow-up 5519019 ✓).
+
+Actions:
+- **🔴 #18 diamond t_seeded was HUNG** (log+csv frozen @step 121210 / "total 234.7min" since 07-06 19:17,
+  ~12h, SLURM still RUNNING — same signature as prior #13/#14 hangs; had no follow-up). **Cancelled 5519015,
+  resubmitted plain → job 5529408** (restores latest ckpt ~120k). Sanity owed once it RUNS: "Restoring
+  checkpoint …120000" (NOT fresh/Not 121210), energy resumes ~−90.55.
+- **⚠️ #13 diamond classical t_rel had a SOFT BLOW-UP.** Clean through 428–430k (−90.6926), then 430–432k
+  spiked (min −47.6, mean −90.05); recovered only to −90.658 by 460k, elevated noise. **Restarted from the
+  last clean ckpt 428000** (like #11/#15): cancelled 5519016, moved 19 post-428k ckpts →
+  `pp/post430k_spike_bak_20260707/` (full csv backed up there as `train_stats_full_to460k.csv`), truncated
+  live csv to ≤428000 (last row −90.69606), **resubmitted → job 5529411**. Sanity owed: log "Restoring
+  checkpoint …428000", energy resumes ~−90.696. (5529411/5529408 PENDING w/ reason **AssocGrpCPUMinutesLimit**
+  = account CPU-minutes hold, will start when minutes/nodes free — normal, not an error.)
+- **Swapped silicon inference: cancelled bc_seeded inference (5514972), launched t_seeded inference → job
+  5529415** (`muon_silicon_q_t_seeded_inf`, PENDING). NEW files (geometry byte-identical to `t_seeded.py` =
+  the t_relaxed Si cage, verified via diff): `configs/silicon/inference_t_seeded.py` +
+  `jobs/silicon/inference_t_seeded.sh` (home env, 8 nodes, optimizer=none so NO KFAC → safe either env,
+  positions=True, restore `/projects/u6em/parv/silicon_unpaired/t_seeded` latest ckpt 218000, save
+  `…/t_seeded/inference` empty→falls back, `positions/` pre-created to dodge the mkdir crash). **Purpose
+  (user): does the T-SEEDED silicon muon form a BOUND STATE (muonium)?** — #17 is the lowest-E Si run and
+  the muon is seeded/held in the relaxed T-cage; test contact/net-spin. **OWED once it dumps positions_*.npy:**
+  add a `silicon_t_seeded` case to `tools/muon_site_analysis.py` (SI geom a=10.26, same as `silicon_t_relaxed`
+  case but positions dir → t_seeded/inference/positions) then `site` / `srpd` / `srpd_extended_radius`
+  (g_up≫g_down at r→0 or localized net-spin excess = muonium; prior Si result = DIAMAGNETIC, so this tests
+  whether seeding+holding the cage changes that).
+
+Open (offered, not done): afterany follow-ups for #14/#15/#17 (only #16 has one) and #19/EXP-004 — hold
+until the AssocGrpCPUMinutes hold clears (queuing more now won't help). EXP-004 (#19, 5529283) still RUNNING
+& healthy (see #2 section) — its step-100 muon walkers still fully diffuse (RMS ~13 bohr), watching for
+contraction at ckpt 2000.
+
+## As of 2026-07-07 (#2, branch `muon_width`) — EXP-004 RESOLVED onto home env: kfac_jax fresh-net crash diagnosed + fixed; run 5529283 training with muon width 0.3
+
+**EXP-004 is finally running correctly.** The v3 run under the HOME env first CRASHED (job 5529246, FAILED
+6.5min): fresh-net multi-host KFAC hit `AssertionError: value.sharding is NamedSharding` in kfac_jax. Full
+diagnosis + fix in [[env-kfac-jax-fresh-net-crash]]. Key findings this session:
+- **Root cause:** the HOME env's `kfac_jax` was a different (newer/dev) build than the OLD env's, both tagged
+  `0.0.8`. The newer build's `get_first(step_counter)` asserts NamedSharding and dies on fresh-net KFAC
+  (warm restores hide it — that's why long-running prod jobs never showed it).
+- **The OLD env is NOT a fallback:** it imports a STALE/copied `ferminet`, so a `wide_burnin.py` run there
+  printed NO `[EXP-004]`/`Initial MCMC width` lines = it runs a train.py without the `muon_move_width` block.
+  Only the HOME env imports our editable repo. ⇒ **all our fork runs must use the HOME env.**
+- **Fix:** swapped HOME env `kfac_jax` + dist-info with the OLD env's working copy (originals backed up
+  `*.bak_20260707` in HOME site-packages).
+- **✅ VERIFIED on 8-node fresh-net:** job **5529283** (HOME env, `pp_wide_burnin_v3`) prints `[EXP-004] ...0.3`
+  + `Initial MCMC width per species: [0.02 0.02 0.3]`, cleared the KFAC step, wrote `ckpt_000000` with
+  **muon width 0.3 / electrons 0.02** (`tools/muon_width_check.py --particles 33,32,1`), now training past
+  step 0 (step ~22, −35.7 climbing, 1.5s/step). `wide_burnin.sh` env line is back on HOME `parvfection`.
+
+**>>> NEXT: <<<** queue an afterany follow-up for 5529283 (24h limit) so the run continues gap-free; then
+let it train and run muon-position inference to see if off-T→BC un-trapping happens (prior H0-likely).
+
+## As of 2026-07-07 (branch `muon_width`) — EXP-004 wide-burnin FINALLY launched CORRECTLY on 8 nodes (v3); width intervention CONFIRMED live in the log; verify cancelled (would OOM)
+
+**EXP-004 (wide muon proposal to un-trap off-T→BC) — the real production run is now RUNNING with the intervention verified.** After the v1/dense/v2 runs silently ran the *old* code (muon width stayed 0.02 — stale-bytecode/timing, see [[project-muon-mcmc-width-diffusion]] and the 07-06 section below), this session got it right end-to-end:
+
+- **Cancelled the single-node verify.** Was going to `sbatch wide_burnin_verify.sh` (job 5529245) but user flagged it would **OOM** — batch_size 4096 across only 4 GPUs on 1 node. Cancelled 5529245 and went straight to the 8-node production run instead. (verify config/script still exist but are unused — the intervention is now proven on the real run, so the verify is unnecessary.)
+- **Added an unmissable stdout print in `train.py`** (in the `if cfg.mcmc.muon_move_width is not None:` block, right after the `sample_all` check, ~line 979): `print('[EXP-004] muon_move_width applied: ...', flush=True)`. `print`+flush (not logging) so it lands in srun stdout regardless of the absl handler. Complements the existing `logging.info('Initial MCMC width per species: ...')` guardrail.
+- **Cleared stale `ferminet/__pycache__/train*.pyc` + the config pyc** (a stale pyc is exactly what masked the fix on v2), py_compiled clean.
+- **Created the fresh empty save dir** `/projects/u6em/parv/diamond/unpaired/bc_relaxed/pp_wide_burnin_v3` (was MISSING → would not have been a warm restore, but created empty to be explicit; `restore_path == save_path` so it starts a brand-new net and the width init actually applies).
+- **Launched 8-node run: `sbatch ferminet/jobs/diamond_2x2/bc_relaxed/wide_burnin.sh` → job 5529246 `muon_d_qpp_bc_rel_widebi_v3` (RUNNING, 8 nodes, 24h limit).** Home env (`/home/u6em/parvfection.u6em/miniforge3` + `ferminet-piku`).
+- **✅ WIDTH INTERVENTION CONFIRMED in `muon_wide_burnin_v3.out`** (~105 s after start): `[EXP-004] muon_move_width applied: last-species init width set to 0.3 (electrons at cfg.mcmc.move_width=0.02)` and `Initial MCMC width per species: [0.02 0.02 0.3]`, then `Burning in MCMC chain for 2000 steps`. This is the thing that silently failed on v1/dense/v2 — it is finally right.
+
+**Config (`configs/diamond/bc_relaxed/wide_burnin.py`):** `muon_move_width=0.3`, electrons 0.02, `burn_in=2000`, batch 4096, `save_freq=100` (checkpoint every 100 steps — dense; `save_tfreq=235`min never binds at ~0.6s/step), 900k iters, save `pp_wide_burnin_v3`.
+
+**Env note:** current home is `parvfection.u6em`; the `_oldenv` scripts + several production `.sh` (e.g. `silicon/t_seeded.sh`) still point at the OLD home `/home/u6em/parvfect.u6em/miniforge3`. `wide_burnin.sh`/`wide_burnin_verify.sh` correctly use the current home.
+
+**>>> NEXT ACTIONS for EXP-004: <<<** (a) queue an afterany follow-up so the 24h run continues gap-free; (b) once it trains out, run muon-position inference and check whether the off-T→BC un-trapping happened (prior on outcome stays **H0-likely** = off-T re-collapse; the run is a diagnostic). Optionally bump `save_freq` 100→2000 to avoid piling up hundreds of ckpt files (won't change results). Diamond bc_seeded inference (5527930) confirmed working this session at ckpt 562000 (1000 fresh positions).
+
+## As of 2026-07-06 (#2, daily check, branch `af`) — #11 si-classical-t_rel BLEW UP & CLOSED; #18 resubmitted; queued 5 afterany follow-ups; #14 ~25.5 mHa below #8 off-T; #17 lowest quantum Si
+
+**Daily monitoring.** 5 training jobs RUNNING & healthy (#13 5501850, #14 5501851, #15 5501852, #16 5501876,
+#17 5501853; csv fresh 11–67 min), + #15 bc_seeded INFERENCE 5514972 RUNNING (name truncates to
+`muon_silicon_q_bc_seeded` in squeue — NOT a training race; writes `inference_bc_seeded.out`), + EXP-004
+verify 5518646 still PENDING (Priority; background monitor pid 88061 alive). No follow-ups were queued for
+the 5 running jobs → **queued 5 afterany (user OK'd): 5519016→#13 (dep 5501850), 5519017→#14 (5501851),
+5519018→#15 (5501852), 5519019→#16 (5501876), 5519020→#17 (5501853).**
+
+**🔴 #11 (si classical t_relaxed) BLEW UP & CLOSED.** Ran clean to step 306602 (−62.92218, ewvar 5.9e-5),
+then INSTANT divergence at 306603 (E→1.4e10, ewvar→1.8e19), stayed garbage to 330k where job 5501849
+**FAILED (exit 1:0)** 03:28 UTC. Ckpts 308k–330k are NaN-corrupt; last clean = `qmcjax_ckpt_306000.npz`.
+**User chose LEAVE STOPPED** (was plateau-approaching −62.924 @300k, ~11 mHa below frozen #2 — treat as tight
+upper bound). To recover later: move 308k–330k ckpts aside, truncate csv to ≤306602, sbatch (restores 306000).
+
+**🟡 #18 (diamond t_seeded) timed out cleanly** @112k (−90.587), both chained follow-ups exhausted →
+**RESUBMITTED plain: job 5519015** (Priority; resumes from 112k warm-up climbing toward ~−90.6).
+
+**Energies (clean block-avg, ΔE vs 07-05; none converged):**
+- #13 d c t_rel @416k −90.69097 ± 0.00023 (tool says CONVERGED but −6.0 mHa run-over-run ⇒ plateau-approaching, NOT settled), Δ+78k
+- #14 d bc_seed @526k **−90.6947** (500–520k block; tool trailing # is incomplete-final-block artifact, real traj monotonic descending), Δ−3.8 mHa — **★ ~25.5 mHa BELOW #8 off-T −90.669, lowest quantum diamond**
+- #15 si bc_seed @167k −62.88753 ± 0.00032 (−2.1e-7, descending), Δ−10.5 mHa, normal Si range
+- #16 si c bc_rel @34k −62.7566 warm-up (restored from ckpt 030510, climbing healthily; orig fresh-net line not re-confirmable from follow-up log, run clean)
+- #17 si t_seed @194k **−62.88820 ± 0.00026** (−1.6e-7, descending), Δ−7.5 mHa — **★ lowest quantum Si, ~16.9 mHa BELOW frozen #10 −62.87133**
+- #18 d t_seed @112k −90.53204 warm-up climbing (resubmitted)
+
+Both comparison tables refreshed. EXP-004 (5518646) status unchanged — still PENDING, no launch decision owed
+until it runs (see prior 07-06 EXP-004 section below for the >>> NEXT ACTION <<<).
+
+## As of 2026-07-06 (LATEST, branch `af`) — EXP-004 deployment bug found & fixed; muon_move_width verified on CPU; single-node verify QUEUED, then launch 8-node v3
+
+**EXP-004 (wide muon proposal to un-trap off-T→BC) — first 3 runs were INVALID.** All three wide-burnin
+runs `pp_wide_burnin` / `pp_wide_burnin_dense` / `pp_wide_burnin_v2` have ckpt_000000 **muon width 0.02,
+not 0.3** (`tools/muon_width_check.py --particles 33,32,1`) — the `muon_move_width=0.3` intervention never
+ran. Cause was NOT `adapt_during_burnin` (no such flag; burn-in never adapts width) and NOT the config
+(all print muon_move_width=0.3). It was **stale-code/timing**: the `muon_move_width` block in `train.py`
+either post-dated the launch (v1 06:00, dense 07:33 both before the 07:50 train.py edit) or was masked by a
+stale `__pycache__/train.cpython-312.pyc` on the compute node (v2 launched 07:50:59, 53s after the edit,
+but its stdout has no "Initial MCMC width per species" guardrail line → ran old code). Git commit status is
+irrelevant to SLURM (python imports train.py from disk). See [[project-muon-mcmc-width-diffusion]].
+
+**Actions taken this session:**
+- **Cancelled** the running-but-broken v2 job `5514933` (was muon=0.02).
+- **Cleared** stale `ferminet/__pycache__/train*.pyc`.
+- **CPU-verified** the fix on the REAL wide_burnin config (optimizer='none', `taskset -c 0-1` +
+  `--xla_cpu_multi_thread_eigen=false` to dodge the login-node pthread/ulimit abort) →
+  logs **`Initial MCMC width per species: [0.02 0.02 0.3]`** ✓ (electrons 0.02, muon 0.3).
+- **Committed** the fix locally as `68bb375` on branch `af` (user will handle push/git themselves — do NOT push).
+  git identity set locally: Parvfect <parvagrw02@gmail.com>.
+- **Production config** `configs/diamond/bc_relaxed/wide_burnin.py` now points at fresh
+  **`pp_wide_burnin_v3`**; 8-node job `jobs/diamond_2x2/bc_relaxed/wide_burnin.sh` renamed `_v3`.
+- **Single-node verify** `configs/.../wide_burnin_verify.py` + `jobs/.../wide_burnin_verify.sh`
+  (burn_in=50, 201 iters, throwaway `pp_wide_burnin_verify`) **SUBMITTED = job 5518646 (PENDING/Priority)**.
+- A background monitor (`scratchpad/wait_verify.sh`) polls until 5518646 finishes, then checks the width
+  log line + ckpt_000000 width.
+
+**>>> NEXT ACTION when verify (5518646) finishes: <<<** confirm (a) its stdout has
+`Initial MCMC width per species: [0.02 0.02 0.3]`, (b) `pp_wide_burnin_verify/qmcjax_ckpt_000000.npz` muon
+width = 0.3. **If both pass → USER APPROVED launching the 8-node production run:
+`sbatch ferminet/jobs/diamond_2x2/bc_relaxed/wide_burnin.sh` (into fresh pp_wide_burnin_v3).** Then delete
+the throwaway `pp_wide_burnin_verify` dir. Prior on EXP-004 outcome stays **H0-likely** (off-T re-collapse)
+— run is a diagnostic. Conda env python: `/home/u6em/parvfection.u6em/miniforge3/envs/ferminet-piku/bin/python`.
+
+## As of 2026-07-05 (branch `af`) — daily check: 6 RUNNING & healthy; only #18 had a follow-up → queued 5 afterany; #14 slope now FLAT & ~22 mHa below #8 off-T; #17 firmly lowest quantum Si; #18 climbing out of warm-up
+
+**6 active jobs (#11/#13/#14/#15/#17/#18) all RUNNING & healthy** (csv fresh ≤40 min at 04:21 UTC, NaN
+≤7/last-2000 = warm-up level). Current running IDs: 5491721 #11, 5485272 #13, 5491723 #14, 5485273 #15,
+5491724 #17, 5491822 #18. **Only #18 had a pending afterany follow-up (5491823)** → the other 5 were
+running with no continuation, so **queued 5 afterany (user OK'd): 5501849→#11 (dep 5491721), 5501850→#13
+(5485272), 5501851→#14 (5491723), 5501852→#15 (5485273), 5501853→#17 (5491724)** — all PENDING/Dependency,
+every active job now gap-free.
+
+**Energies (clean block-avg, ΔE vs 07-04 #2; NONE converged):**
+- #11 si c t_rel @300k **−62.92419 ± 0.00015** (−6.9e-8/step, still >2σ = plateau-approaching), Δ+19.6k / −1.4 mHa, ~11 mHa below frozen #2
+- #13 d c t_rel @338k −90.68500 ± 0.00042 (−5.8e-8/step, slope stat. FLAT/noise-limited), Δ+37.8k / −2.4 mHa
+- #14 d bc_seed @450k **−90.69088 ± 0.00029** (−8.1e-8/step, **slope now STATISTICALLY FLAT** = plateauing/noise-limited), Δ+36k / −3.9 mHa — **★ now ~21.9 mHa BELOW #8 off-T −90.669, lowest quantum diamond run, closing on classical fixed-T −90.696**
+- #15 si bc_seed @126k −62.87699 ± 0.00053 (−3.8e-7/step, descending), Δ+20k / −7.7 mHa — normal Si range
+- #17 si t_seed @154k **−62.88074 ± 0.00033** (−2.3e-7/step, descending), Δ+20k / −5.6 mHa — **★ firmly lowest quantum Si, ~9.4 mHa BELOW frozen #10 −62.87133**
+- #18 d t_seed @42k warm-up climbing (−90.36 inst, ewmean −90.32, tool plateau garbage) — heading to ~−90.6
+
+Both comparison tables refreshed. Verdicts: **★ #14 bc_seeded slope now flat & ~22 mHa below #8 off-T**
+(BC-vs-off-T verdict firmly BC); **★ #17 t_seeded firmly lowest quantum Si**; **✅ #18 climbing cleanly
+out of warm-up**. Watch next check: whether #14/#13 hold their flat plateaus and #18 reaches ~−90.6.
+
+**POST-CHECK ACTION (2026-07-05, user request): ADDED + LAUNCHED #16 silicon BC-relaxed CLASSICAL**
+(the long-planned silicon analogue of diamond #4). Wrote `configs/silicon/bc_relaxed_classical.py`
++ `jobs/silicon/bc_relaxed_classical.sh` (py_compile clean; mirrors `t_relaxed_classical.py` but with
+the bc_relaxed 16-Si geometry + a FIXED 'H' at the BC midpoint (0.125a,0.125a,0.125a) = exact midpoint
+of Si #0/#8, 2.994 bohr equidistant; particles (33,32) 65 e⁻, mol.charge=1, save
+`silicon_unpaired/classical/bc_relaxed`). Save dir created empty before submit → fresh net.
+**Job 5501873 (PENDING), follow-up 5501876 (afterany).** Now 7 active jobs. **Sanity check owed once it
+RUNS:** tail `bc_relaxed_classical.out` for fresh-net line ("No checkpoint found. Training new model."),
+no early NaN blow-up. This is the fixed-BC upper bound for the Si BC-vs-T energy question (Si muon is
+diamagnetic, so a fixed-BC classical run bounds the BC contact density — pairs with #15 bc_seeded quantum).
+
+## As of 2026-07-04 (#2, branch `af`) — daily check: 6 RUNNING & healthy w/ follow-ups already PENDING → NO requeue; #18 fresh-net sanity PASSES; #14 ~18 mHa below #8 off-T; #17 now below frozen #10
+
+**Nothing to submit.** All 6 active jobs RUNNING (5485268 #11, 5485263 #13, 5485270 #14, 5485264 #15,
+5485271 #17, 5491822 #18) and **each ALREADY had exactly one afterany follow-up PENDING** (5491721→#11,
+5485272→#13, 5491723→#14, 5485273→#15, 5491724→#17, 5491823→#18) ⇒ every about-to-expire job covered
+gap-free, no requeue this check. All healthy: csv fresh within ~20 min, NaN ≤5/last-2000 (warm-up level).
+(Active set is now #11,#13,#14,#15,#17,#18 — #12 STOPPED earlier today.)
+
+**✅ #18 diamond T-seeded fresh-net sanity check PASSES** (owed from earlier today): log shows "No
+checkpoint found. Training new model." (fresh net, NOT warm restore), energy climbing normally out of
+warm-up (−55.5@750 → −87.9@5750, heading to ~−90.6), 1.52s/step, step 0→6722, NaN confined to early
+warm-up. Muon seed coord NOT printed to log → the cubic-frac ≈0.7503 seed check still owed at inference.
+
+**Energies (clean block-avg, ΔE vs earlier 07-04 check; NONE converged):**
+- #11 si c t_rel @280.4k **−62.92281 ± 0.00016** (−6.8e-8/step), Δ+12.4k / −0.5 mHa — plateau-approaching, NOT settled (slope >2σ), ~9.4 mHa below frozen #2
+- #13 d c t_rel @300.2k −90.68258 ± 0.00022 (−6.4e-8/step, slope now statistically FLAT/noise-limited), Δ+22.2k / −3.2 mHa
+- #14 d bc_seed @414k **−90.68701 ± 0.00025** (−1.1e-7/step, descending), Δ+20k / −2.0 mHa — **★ now ~18 mHa BELOW #8 off-T −90.669**
+- #15 si bc_seed @106k −62.86925 ± 0.00060 (−4.5e-7/step), Δ+12k / −6.5 mHa — node healthy, normal Si range
+- #17 si t_seed @134k **−62.87512 ± 0.00049** (−3.5e-7/step), Δ+12k / −4.6 mHa — **★ now edged BELOW frozen #10 −62.87133, firmly lowest quantum Si**
+- #18 d t_seed @6k fresh-net warm-up (−88 climbing, tool garbage) — new run
+
+Both comparison tables refreshed. Verdicts: **★ #14 bc_seeded now ~18 mHa below #8 off-T, still
+descending** (BC-vs-off-T verdict keeps strengthening); **★ #17 t_seeded now below frozen #10 = lowest
+quantum Si**; **✅ #15 resubmit holding** (+12k steps, healthy node); **✅ #18 launched clean as fresh net**.
+Watch next check: #18 climbing out of warm-up + its inference-time seed check.
+
+## As of 2026-07-04 (branch `af`) — daily check: 6 RUNNING & healthy; #13/#15 resumed cleanly from 07-03 hang/crawl; queued 4 afterany follow-ups; #14 ~16 mHa below #8 off-T; #17 now lowest quantum Si
+
+**All 6 active jobs RUNNING & healthy** (5485268 #11, 5485269 #12, 5485263 #13, 5485270 #14, 5485264 #15,
+5485271 #17; csv fresh 3–57 min, NaN ≤7/last-2000 = warm-up). **07-03's two fixes WORKED:** #13 (5485263)
+resumed cleanly from its hang — now @278k, 1.48s/step, well past the 263k hang point; **#15 (5485264)
+node recovered — now 2.79s/step (was 30.1s/step crawl), @94k, +8.4k steps since resubmit.** #13/#15
+already had pending follow-ups (5485272/5485273); **queued 4 more afterany for the jobs that lacked them:
+5491721→#11 (dep 5485268), 5491722→#12 (5485269), 5491723→#14 (5485270), 5491724→#17 (5485271)** — every
+active job now has exactly one gap-free continuation.
+
+**Energies (clean block-avg, ΔE vs 07-03):**
+- #11 si c t_rel @268k **−62.92232 ± 0.00013** (−1.5e-8/step) — **CONVERGED per tool**, ~9.0 mHa below frozen #2; Δ+22k / −1.4 mHa
+- #12 d q t_rel @478k −90.65979 ± 0.00023 (−6.2e-8/step, slope now statistically FLAT/noise-limited), Δ+38k / −2.2 mHa
+- #13 d c t_rel @278k −90.67941 ± 0.00030 (−1.8e-7/step, descending; resumed from hang), Δ+14.6k / −2.4 mHa
+- #14 d bc_seed @394k **−90.68506 ± 0.00030** (−1.2e-7/step, descending), Δ+38k / −6.1 mHa — **★ now ~16 mHa BELOW #8 off-T −90.669**
+- #15 si bc_seed @94k −62.86272 ± 0.00075 (−6.4e-7/step), Δ+8.4k / −5.5 mHa — node recovered, normal Si range
+- #17 si t_seed @122k **−62.87053 ± 0.00056** (−4.1e-7/step), Δ+22k / −10.8 mHa — **★ now the LOWEST-energy quantum Si run, ≈ frozen #10 −62.87133**
+
+Both comparison tables refreshed. Verdicts: **★ #14 diamond bc_seeded firmly & increasingly BELOW #8
+off-T** (BC lower-E than off-T trap); **★ #17 t_seeded now lowest quantum Si**; **★ #11 CONVERGED**;
+**✅ #15 resubmit fixed the crawl**. Watch next check: whether #14 keeps descending.
+
+**POST-CHECK ACTIONS (2026-07-04, user request):**
+1. **STOPPED #12 diamond t_relaxed quantum** — cancelled 5485269 + its follow-up 5491722. Final
+   −90.65979 ± 0.00023 @478k (was noise-limited, slope flat −6.2e-8). Its question is answered: the
+   unseeded muon HELD the expanded relaxed T-cage as muonium ([[project-diamond-t-relaxed-muon-result]]).
+   Restart if ever needed: `sbatch pp.sh` from `jobs/diamond_2x2/t_relaxed/`. Now 5 active jobs.
+2. **ADDED + LAUNCHED #18 diamond T-seeded** — diamond analogue of #17. `configs/diamond/t_relaxed/
+   t_seeded.py` + `jobs/diamond_2x2/t_relaxed/t_seeded.sh` (py_compile clean). Seeds the muon at the
+   relaxed T-site (0.7502845a)³ (verified centroid of expanded C #4-#7, 2.9305 bohr equidistant), width
+   0.35, fresh net, save `diamond/unpaired/t_seeded/pp` (created empty before submit). **Job 5491822
+   (PENDING/Priority), follow-up 5491823.** Back to 6 active jobs. **SANITY CHECK OWED once it RUNS:**
+   tail `jobs/diamond_2x2/t_relaxed/t_seeded.out` for "No checkpoint found. Training new model." (fresh
+   net, NOT warm restore), muon seeds at cubic-frac ≈0.7503 coordinated by expanded C #4-#7, no early NaN.
+   See [[training-monitoring]] #18.
+3. **#11 "CONVERGED" is a LOCAL/window artifact — NOT truly converged.** energy_convergence.py's default
+   window=20 says CONVERGED, but widening to window=50/100 flips to NOT CONVERGED (slope −5.9e-8 to
+   −8.0e-8/step, >2σ from flat). 20k-chunk trajectory is still monotonically descending & decelerating:
+   220-240k −62.92067 → 240-260k −62.92186 → 260-280k −62.92239 (~0.5-1.2 mHa lower each 20k block).
+   And run-over-run it has dropped ~1.4 mHa/daily-check. **Verdict: plateau-APPROACHING / noise-limited,
+   still inching down; treat as a tight upper bound, not settled.** Report this every time #11 is cited.
+
+## As of 2026-07-03 (branch `af`) — daily check: #13 HUNG + #15 CRAWLING (both cancel+resubmit); queued 6 afterany follow-ups; #14 holds ~10 mHa below #8 off-T; #17 caught up to Si range
+
+**Two problems, both fixed (user OK'd).** All 6 showed RUNNING but: **#13 (d classical t_rel, 5463405)
+was HUNG** — log+csv frozen @263419 since 01:22 UTC (~10h), `total: 234.7min` at last line, holding 8
+nodes (same as the 06-29 #14 hang). **#15 (si bc_seeded, 5463407) was CRAWLING at 30.1s/step (~20×
+the normal 1.5s)** — alive/writing but eta ~283 days, a degraded node in its allocation (root cause of
+the "abnormally slow step advance" flagged the prior 2 checks; NOT a hang). **Cancelled both, resubmitted
+plain (resume from latest ckpt): #13→5485263, #15→5485264** (both PENDING for nodes). Other 4 (#11/#12/#14/#17)
+healthy: fresh csv, 1.5–2.8s/step, NaN ≤6/last-2000. Queue had NO follow-ups → **queued 6 afterany: 5485268→#11
+(dep 5463403), 5485269→#12 (5463404), 5485270→#14 (5463406), 5485271→#17 (5463408), 5485272→#13 (5485263),
+5485273→#15 (5485264).**
+
+**Energies (clean block-avg, ΔE vs 07-02 #2 check):**
+- #11 si c t_rel @246k **−62.92093 ± 0.00013** (−2.9e-8/step) — now **CONVERGED per tool (slope flat)**, ~7.6 mHa below frozen #2; Δ+26k / −1.9 mHa
+- #12 d q t_rel @440k −90.65759 ± 0.00023 (−8.2e-8/step), Δ+50k / −3.9 mHa
+- #13 d c t_rel @263.4k −90.67705 ± 0.00027 (frozen at hang; was −1.3e-7/step), Δ+27.4k / −4.6 mHa
+- #14 d bc_seed @356k **−90.67900 ± 0.00041** (−2.4e-7/step), Δ+50k / +0.7 mHa (within SEM; slope still descending) — **★ stays ~10 mHa BELOW #8 off-T −90.669**
+- #15 si bc_seed @85.6k −62.85719 ± 0.00093 (−7.7e-7/step), Δ+2.6k / −1.1 mHa — slow advance was the 30s/step node (resubmitted)
+- #17 si t_seed @100k **−62.85974 ± 0.00083** (−6.2e-7/step), Δ+26k / −24.2 mHa — **★ fresh-net has CAUGHT UP to normal Si quantum range (~−62.86), now ≈ matching #15**
+
+Both comparison tables refreshed. Verdicts intact: **★ #14 diamond bc_seeded firmly BELOW #8 off-T**;
+**★ #17 t_seeded caught up to Si range**; **★ #11 plateaued**. Watch next check: whether resubmitted #15
+lands on healthy nodes (~1.5s/step) and #13 resumes cleanly from ckpt.
+
+## As of 2026-07-02 (#2, branch `af`) — daily check: 6 jobs RUNNING with follow-ups ALREADY queued → NO action needed; all healthy
+
+**Nothing to submit.** All 6 active jobs RUNNING (5457805 #11, 5457806 #12, 5457808 #13, 5457814 #14,
+5457815 #15, 5457817 #17; 16–17.5h in, 6.5–8h left) and **each ALREADY had exactly one
+correctly-chained afterany follow-up PENDING** (verified deps: 5463403→#11, 5463404→#12, 5463405→#13,
+5463406→#14, 5463407→#15, 5463408→#17) ⇒ every "about-to-expire" job is covered gap-free, no requeue
+needed this check. All healthy: csv fresh 07-02 13:2x–13:5x, NaN ≤6/last-2000 (warm-up level).
+
+**Energies (clean block-avg, NONE converged; ΔE vs 07-02 #1 check):**
+- #11 si c t_rel @220k −62.91902 ± 0.00017 (−9.6e-8/step), Δ+14k / ΔE −0.0012; ~5.6 mHa below frozen #2
+- #12 d q t_rel @390k −90.65373 ± 0.00022 (−1.0e-7/step), Δ+24k / ΔE −0.0023
+- #13 d c t_rel @236k −90.67246 ± 0.00030 (−1.8e-7/step), Δ+26k / ΔE −0.0061
+- #14 d bc_seed @306k **−90.67965 ± 0.00025** (−1.5e-7/step), Δ+26k / ΔE −0.0041 — **★ now ~10.6 mHa BELOW #8 off-T −90.669**
+- #15 si bc_seed @83k −62.85610 ± 0.00101 (−8.1e-7/step), Δ+1k / ΔE −0.0010 — ⚠️ **step barely moved (82k→83k over 2 checks) — abnormally slow, WATCH**
+- #17 si t_seed @74k −62.83555 ± 0.00214 (−1.5e-6/step), Δ+14k / ΔE −0.0218 — fresh-net climbing
+
+Both comparison tables refreshed. Verdicts intact: **★ #14 diamond bc_seeded now firmly BELOW #8
+off-T** (BC lower-E than off-T trap), **★ #15 Si bc_seeded recovery holds** (normal Si range, but
+watch its slow step advance).
+
+## As of 2026-07-02 (branch `af`) — daily check: 6 jobs RESUBMITTED & RUNNING on re-owned `parv`; queued 6 afterany follow-ups; all healthy
+
+**All 6 active jobs are RUNNING again** (5457805 #11, 5457806 #12, 5457808 #13, 5457814 #14,
+5457815 #15, 5457817 #17; 5–7h in) after the 07-01 node-abort deaths — resubmitted (plain sbatch,
+resumed from latest ckpt). Queue had NO pending afterany follow-ups → **queued one per job (user
+OK'd):** 5463403→#11, 5463404→#12, 5463405→#13, 5463406→#14, 5463407→#15, 5463408→#17 (all
+PENDING/Dependency). All healthy: fresh csv writes (07-02 02:3x–03:2x), NaN ≤4/last-2000 rows (warm-up level).
+
+**PATH MIGRATION = DONE.** The parv→parvfection account migration is COMPLETE: resolved by
+RE-OWNING `/projects/u6em/parv` to the current account (`ls` shows `parvfection.u6em brics.u6em`),
+NOT by copying to a new `/projects/u6em/parvfection` base (which does NOT exist). All 6 configs still
+(correctly) point to `parv` and it's writable → live data. `PATH_MIGRATION.md` is now OBSOLETE (can
+be deleted). No path/config changes outstanding.
+
+**NEXT STEPS (open):** Fix the conda env in this home directory — `conda`/`conda activate
+ferminet-piku` do NOT work in this session's shell (`conda: command not found`, `python: command
+not found`). Workaround used this session: call the env python by absolute path
+`/home/u6em/parvfection.u6em/miniforge3/envs/ferminet-piku/bin/python` (miniforge3 is at
+`/home/u6em/parvfection.u6em/miniforge3`). Need to wire conda init into the shell profile so
+`conda activate ferminet-piku` / bare `python` work again. See [[feedback-python-env]].
+
+**Energies (clean block-avg, NONE converged; ΔE vs 07-01 check):**
+- #11 si c t_rel @206k −62.91778 ± 0.00016 (−8.7e-8/step), Δ+6k / ΔE −0.0007; ~4 mHa below frozen #2
+- #12 d q t_rel @366k −90.65141 ± 0.00024 (−1.0e-7/step), Δ+14k / ΔE −0.0014
+- #13 d c t_rel @210k −90.66638 ± 0.00046 (−3.7e-7/step), Δ+12k / ΔE −0.0044
+- #14 d bc_seed @280k **−90.67555 ± 0.00039** (−2.4e-7/step), Δ+10k / ΔE −0.0022 — **★ now ~6.5 mHa BELOW #8 off-T −90.669**
+- #15 si bc_seed @82k −62.85512 ± 0.00108 (−8.4e-7/step), Δ~0 / ΔE −0.0022 — recovered/holding, but **step barely moved from 07-01 82k (slow restart, watch)**
+- #17 si t_seed @60k −62.81381 ± 0.00252 (−2.0e-6/step), Δ+4k / ΔE −0.0135 — fresh-net climbing
+
+Tables refreshed in both comparison memories. Both verdicts intact: **★ #14 diamond bc_seeded stays
+BELOW #8 off-T** (BC lower-E than off-T trap), **★ #15 Si bc_seeded recovery holds** (normal Si range).
 
 ## As of 2026-07-01 (LATEST, branch `af`) — daily check: QUEUE EMPTY, all 6 active jobs DEAD (node aborts); #14 CROSSED #8 off-T; #15 fully recovered; did NOT resubmit (user said don't)
 
