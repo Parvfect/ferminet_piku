@@ -1,10 +1,89 @@
 ---
 name: current-status
-description: "Snapshot of the most recent session's focus and open threads — overwrite/update this each session rather than appending. LATEST (2026-07-07): EXP-004 wide-burnin production run 5529246 launched correctly on 8 nodes, muon width 0.3 intervention CONFIRMED live in log."
+description: "Snapshot of the most recent session's focus and open threads — overwrite/update this each session rather than appending. LATEST (2026-08-17): CLUSTER EXPIRING — curated data backup DONE (GitHub + tar archives), no active jobs; next = restore on new cluster + run EXP-008/007 (bind silicon T-muonium)."
 metadata: 
   node_type: memory
   type: project
   originSessionId: cd7babd3-df02-4561-aef6-eb933702fa94
+---
+
+## As of 2026-08-17 (branch `muon_width`) — CLUSTER EXPIRING: full data backup DONE; no active jobs; project written up for handoff
+
+**~40-day gap since the last session (2026-07-08).** The HPC cluster is being
+decommissioned — both `/home/u6em/parvfection.u6em` and `/projects/u6em/parv`
+disappear. `squeue` empty; NO active training/inference jobs (the #13–#19 daily
+rotation wound down long ago). This session = back up everything + write the
+project up for a clean restart elsewhere. **Nothing is running; nothing to
+resubmit here.** The daily-monitoring routine in [[training-monitoring]] is
+effectively retired until runs are relaunched on a new cluster.
+
+**Backup COMPLETE (3 locations):**
+1. **GitHub** `git@github.com:Parvfect/ferminet_piku.git` — pushed `muon_width`
+   @ `fa49945` (all code/configs/jobs/tools/experiments + `claude_memory/`
+   refreshed with the 39 live memory files + new docs) and `af` @ `68bb375`.
+   Everything code/text is safe here. Env reproducible from `requirements.txt`
+   (conda `ferminet-piku`).
+2. **Main data archive** `/projects/u6em/parv_curated_backup_2026-08-17.tar.gz`
+   (9.6 GB, sha256 `7990832da8…f7c7229`) — newest ckpt/run (67) + ALL
+   `train_stats.csv` (65) + ALL current inference `positions_*.npy` (21,802) +
+   `srpd_*.txt` (422) + `_extra/` (QE `.in/.out` decks, SLURM `.out` logs). Has
+   `MANIFEST.txt` (per-file sha256). Curated 272 GB→12 GB (dropped 8,860→67
+   redundant ckpts). Staging tree also on-cluster: `parv_backup_curated/`.
+3. **Checkpoint supplement** `/projects/u6em/parv_ckpts_supplement_2026-08-17.tar.gz`
+   (3.1 GB, sha256 `255081c66c…795ae59`) — last-20 ckpts of the 6 **no-inference-
+   dump** key runs (#17 si t_seeded, #18 d t_seeded, #13 d classical t_relaxed,
+   #16 si classical bc_relaxed, EXP-004 `pp_wide_burnin_v3`, EXP-005
+   `pp_wide_burnin_frozen`) so their muonium SRPD verdicts stay reproducible
+   (analysis pools the last ~20 ckpts' `data/positions`). Staging:
+   `parv_backup_ckpts_supplement/`.
+
+**User is transferring the archives to a personal/institutional machine
+themselves** (pull), and will verify on the NEW cluster. Told them: don't delete
+`/projects` until `sha256sum -c` passes on the destination.
+
+**New docs written & committed this session (all in repo root / experiments/):**
+- `context.md` — full project results writeup (intro, per-system results, EXP
+  summary table, next steps). Good starting read next time.
+- `backup_details.md` — every system's weights location in the backup, posdump
+  status, verdict, + restore/re-analysis instructions.
+- `data_backup.md` — backup process tracker/log.
+- `experiments/EXP-007…md` + `EXP-008…md` (were untracked, now committed) — the
+  planned silicon-T-muonium experiments.
+
+**⚠️ KNOWN BACKUP DEFECT (checkpoint audit, 67 scanned for blown-up/NaN weights):**
+- `silicon_unpaired/classical/t_relaxed` newest ckpt **330000 is CORRUPT**
+  (|param|max ≈ 2.5e11, post-blow-up — blew up at step ~306603). The last CLEAN
+  weight is **`qmcjax_ckpt_306000.npz`** (|param| ≈ 33), still in source at
+  `/projects/u6em/parv/silicon_unpaired/classical/t_relaxed/`. **NOT yet swapped
+  into the backup** (user interrupted before the fix; staging untouched). If that
+  run is ever resumed, grab 306000 separately. Its science is unaffected (came
+  from the inference dump). Also `muonioum/002000` is NaN but it's a dead
+  throwaway molecule test (real one = `muonioum2/178000`, clean). All other 65
+  newest ckpts healthy.
+
+**★ Useful fact re mismatch-safety (learned this session):** the FermiNet
+`qmcjax_ckpt_*.npz` `data` dict **embeds the geometry** — `atoms`, `charges`,
+`positions` (→ n_particles), `spins` (→ up/dn split), plus `mcmc_width` (len =
+n_species) and `params` (→ net architecture). So a checkpoint can be validated
+against a config (compare atoms/charges) and restore fails LOUDLY on shape
+mismatch — can't silently load wrong weights. Physics knobs NOT in the ckpt
+(muon mass, PP, lattice vecs, envelope type) live in the git `configs/*.py`,
+mapped per save_path in `backup_details.md` / [[job-save-paths]].
+
+**>>> NEXT SESSION (on the new cluster): <<<**
+1. Rebuild env (`requirements.txt`, conda `ferminet-piku`), clone repo, restore
+   weights from the archives (see `backup_details.md` §4). Verify with
+   `sha256sum -c`.
+2. Science frontier = **bind silicon T-site muonium** (the one µSR state we miss;
+   see `context.md` §5). Run order: **EXP-008** (electron seeding on classical
+   fixed Si-T muon — cheap basin-vs-representability discriminator, needs only
+   `mcmc.electron_init_coord/_width` plumbing in `init.py`/`base_config.py`) →
+   if it washes out, **EXP-007** (muon-anchored diffuse envelope + 3×3×3 cell).
+   Full designs in `experiments/EXP-007/008.md`, [[project-experiments]].
+3. Science state is SETTLED for the writeup: diamond = muonium at T (contact) &
+   BC (bond-orbital); silicon-T = diamagnetic, BC = weak muonium; off-BC =
+   optimisation artefact (EXP-005); energy⟂local-spin decoupling (EXP-006).
+
 ---
 
 ## As of 2026-07-07 (#3, branch `muon_width`) — daily monitoring: #18 hung→resubmitted; #13 soft blow-up→restarted from pre-spike ckpt; swapped Si bc_seeded inference → t_seeded inference (bound-state test)

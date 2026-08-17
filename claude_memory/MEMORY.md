@@ -1,7 +1,7 @@
 # Memory Index
 
 - [Research goal: muon site](research_goal_muon_site.md) — standing goal: verify SRPD shows muon at BC site (relaxed) / T or BC site (unrelaxed)
-- [Current status](current_status.md) — latest session snapshot: 2026-07-01 daily check, all 6 active jobs DEAD (node aborts), did NOT resubmit
+- [Current status](current_status.md) — LATEST 2026-08-17: CLUSTER EXPIRING, full data backup DONE (GitHub `muon_width`@fa49945 + tar archives on /projects), no active jobs; docs context.md/backup_details.md/data_backup.md written; next = restore on new cluster + EXP-008/007 (bind silicon T-muonium). One backup defect: si classical t_relaxed newest ckpt corrupt, clean=306000
 - [Training monitoring](training_monitoring.md) — Daily SLURM check procedure, active job table (#11–#17), afterany follow-up queuing rules
 - [Job save paths](job_save_paths.md) — Complete lookup of train_stats.csv + checkpoint dirs for all production jobs
 - [Diamond Results (consolidated)](project_diamond_results.md) — Diamond GSE comparison table (★ active) + muon-site inference results for all runs
